@@ -1,5 +1,5 @@
 "use client";
-import Image from 'next/image';
+import Image from "next/legacy/image";
 
 import clsx from "clsx"; // Optional if you want to conditionally join classes easily
 // If you don't want to install `clsx`, you can manually concatenate strings.
