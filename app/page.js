@@ -10,6 +10,7 @@ import WagerPanel from "./utils/WagerPanel";
 import { settleAllBets } from "./utils/payouts";
 import { describe2CardHand } from "./utils/twoCardDescriptions";
 import { describe5CardHand } from "./utils/fiveCardDescriptions";
+import BlogIndex from "./utils/BlogIndex";
 
 
 export default function Home() {
@@ -236,6 +237,8 @@ export default function Home() {
         lastRoundBets={lastRoundBets}
         payoutBreakdown={payoutBreakdown} 
       />
+
+      <BlogIndex />
       </div>
 
       <div className="flex-auto">
@@ -354,6 +357,7 @@ export default function Home() {
       )}
 
     </div>
+      
       
     </main>
     
