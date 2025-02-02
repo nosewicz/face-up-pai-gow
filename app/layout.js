@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "./utils/Header";
+import Script from "next/script";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,6 +27,17 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-100`}
       >
+        <Script async src="https://www.googletagmanager.com/gtag/js?id=G-STCSWY7WCG" />
+        <Script id="googleanalytics-init">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-STCSWY7WCG');
+            
+          `}
+        </Script>
         <Header />
         {children}
       </body>
