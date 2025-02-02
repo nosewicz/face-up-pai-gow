@@ -1,5 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Header from "./utils/Header";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -12,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Face-Up Pai Gow Poker",
-  description: "Learn to play Face-Up Pai Gow Poker for free!",
+  title: "Face-Up Pai Gow Poker | PaiGowLab",
+  description: "Learn to play Face-Up Pai Gow Poker for free at PaiGowLab.com!",
 };
 
 export default function RootLayout({ children }) {
@@ -22,6 +23,7 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-100`}
       >
+        <Header />
         {children}
       </body>
     </html>
