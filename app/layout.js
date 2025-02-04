@@ -25,7 +25,7 @@ export default function RootLayout({ children }) {
         <meta name="google-adsense-account" content="ca-pub-5619143235904865"></meta>
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-100`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-100 dark:bg-gray-800`}
       >
         <Script async src="https://www.googletagmanager.com/gtag/js?id=G-STCSWY7WCG" />
         <Script id="googleanalytics-init">

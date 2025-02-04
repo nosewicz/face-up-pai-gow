@@ -225,10 +225,10 @@ export default function Home() {
   }
 
   return (
-    <main className="max-w-6xl mx-auto p-4 flex gap-4">
+    <main className="max-w-6xl mx-auto p-4 flex flex-col-reverse gap-4 md:flex-row">
 
 
-      <div className="flex-none w-64">
+      <div className="flex-auto md:basis-1/4">
       <WagerPanel
         bankroll={bankroll}
         setBankroll={setBankroll}
@@ -241,7 +241,7 @@ export default function Home() {
       <BlogIndex />
       </div>
 
-      <div className="flex-auto">
+      <div className="flex-auto md:basis-3/4">
       
       <h1 className="text-2xl font-bold text-center mb-4">
         Face-Up Pai Gow Poker

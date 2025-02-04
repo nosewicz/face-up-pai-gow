@@ -128,7 +128,7 @@ export default function WagerPanel({
       </div>
       
       {payoutBreakdown && (
-        <div className="mt-4 p-2 border border-gray-400 bg-gray-100">
+        <div className="mt-4 p-2 border border-gray-400">
           <h3 className="font-bold">Last Round Payouts</h3>
           
           {/* Main bet result */}
@@ -151,7 +151,7 @@ export default function WagerPanel({
           )}
         </div>
       )}
-      <div className="mt-4 p-2 bg-gray-100">
+      <div className="mt-4 p-2">
         <h3 className="font-bold">Fortune Paytable:</h3>
         <p> Three Of A Kind: 4x<br></br>
   Straight: 5x<br></br>
