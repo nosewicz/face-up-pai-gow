@@ -178,10 +178,12 @@ export default function Home() {
   // This is needed to allow a drop (default is "not allowed")
   function handleDragOver(e) {
     e.preventDefault();
+    e.stopPropagation();
   }
 
   function handleDropLow(e) {
     e.preventDefault();
+    e.stopPropagation();
     const source = e.dataTransfer.getData("source");
     const cardIndexStr = e.dataTransfer.getData("cardIndex");
     if (!cardIndexStr) return;
@@ -202,6 +204,7 @@ export default function Home() {
 
   function handleDropPool(e) {
     e.preventDefault();
+    e.stopPropagation();
     
     // Get the 'source' array and 'cardIndex'
     const source = e.dataTransfer.getData("source");
