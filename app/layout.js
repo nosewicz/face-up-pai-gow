@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "./utils/Header";
 import Script from "next/script";
+import PolyfillProvider from "./utils/PolyfillProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,7 +40,9 @@ export default function RootLayout({ children }) {
           `}
         </Script>
         <Header />
-        {children}
+        <PolyfillProvider>
+          {children}
+        </PolyfillProvider>
       </body>
     </html>
   );
