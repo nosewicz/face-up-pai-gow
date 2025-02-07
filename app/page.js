@@ -298,7 +298,7 @@ console.log("index:", item.index);
             let selectedCard;
             setPlayerLow((prevLow) => {
               selectedCard = prevLow[item.index];
-              if (!selectedCard) return prevPool;
+              if (!selectedCard) return prevLow;
               return prevLow.filter((_, i) => i !== item.index);
             });
             if (selectedCard) {
