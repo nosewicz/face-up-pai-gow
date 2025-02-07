@@ -2,7 +2,8 @@
 // If you're on Next.js App Router, ensure client-side rendering for drag/drop
 
 import { useCallback } from "react"; // or useState if storing child-specific states
-import Chip from "./Chip";
+import DraggableChip from "./DraggableChip";
+import BetCircle from "./BetCircle";
 
 export default function WagerPanel({
   bankroll,
@@ -13,45 +14,23 @@ export default function WagerPanel({
   payoutBreakdown,
 }) {
   // For drag-and-drop
-  const allowDrop = useCallback((e) => {
-    e.preventDefault();
-  }, []);
+  function handleDropChip(betType, chipValue) {
+    console.log("Dropping chipValue:", chipValue, "on betType:", betType);
 
-  const handleDragStart = useCallback((e, chipValue) => {
-    e.dataTransfer.setData("chipValue", String(chipValue));
-  }, []);
+    // Check bankroll
+    if (bankroll - chipValue < 0) {
+      alert("Not enough bankroll!");
+      return;
+    }
 
-  const handleDropBet = useCallback(
-    (betType) => (e) => {
-      e.preventDefault();
-      const chipValueStr = e.dataTransfer.getData("chipValue");
-      if (!chipValueStr) return;
-
-      const chipValue = parseInt(chipValueStr, 10);
-
-      // Check bankroll
-      if (bankroll - chipValue < 0) {
-        alert("Not enough bankroll!");
-        return;
-      }
-
-      console.log("Placing chip:", chipValue, "on", betType);
-    console.log("Bankroll before dropBet:", bankroll);
-
-      // Deduct from bankroll
-      //setBankroll((prev) => {
-       // console.log("prev bankroll was", prev, "deducting", chipValue);
-        //return prev - chipValue;
-      //});
-
-      // Add to the appropriate bet
-      setBets((prev) => {
-        console.log("prev bets:", prev);
-        return { ...prev, [betType]: prev[betType] + chipValue };
-      });
-    },
-    [bankroll, setBankroll, setBets]
-  );
+    // We only remove the bet from bankroll at final settlement (Approach A),
+    // unless you prefer subtracting up-front. For the "Approach A" way:
+    // Just add to bets
+    setBets((prev) => ({
+      ...prev,
+      [betType]: prev[betType] + chipValue,
+    }));
+  }
 
    // The "Repeat Bet" button logic:
    function handleRepeatBet() {
@@ -59,12 +38,6 @@ export default function WagerPanel({
       alert("No previous bets to repeat!");
       return;
     }
-    // If you want to do a bankroll check, you could sum the 
-    // lastRoundBets and compare to bankroll. 
-    // But if you're only removing from bankroll at settlement, 
-    // that might not be necessary here.
-
-    // Just set current bets to last round's bets:
     setBets({ ...lastRoundBets });
   }
 
@@ -87,46 +60,27 @@ export default function WagerPanel({
         </button>
       </div>
      
-      {/* Chip Row */}
-      <div className="flex gap-2 mb-4">
+      {/* Row of draggable chips */}
+       <div className="flex gap-2 mb-4">
         {chipDenominations.map((val) => (
-          <Chip key={val} value={val} onDragStart={handleDragStart} />
+          <DraggableChip key={val} value={val} />
         ))}
       </div>
 
       {/* Bet Circles */}
       <div className="flex gap-4">
-        {/* Main Bet */}
-        <div
-          className="bet-circle w-16 h-16 rounded-full border-2 border-gray-600 flex flex-col items-center justify-center"
-          onDragOver={allowDrop}
-          onDrop={handleDropBet("main")}
-        >
-          <p className="text-sm">Main Bet</p>
-          <p className="text-sm">${bets.main}</p>
-        </div>
-
-        {/* Fortune Bet */}
-        <div
-          className="bet-circle w-16 h-16 rounded-full border-2 border-gray-600 flex flex-col items-center justify-center"
-          onDragOver={allowDrop}
-          onDrop={handleDropBet("fortune")}
-        >
-          <p className="text-sm">Fortune</p>
-          <p className="text-sm">${bets.fortune}</p>
-        </div>
-
-        {/* Insurance Bet 
-        <div
-          className="bet-circle w-16 h-16 rounded-full border-2 border-gray-600 flex flex-col items-center justify-center"
-          onDragOver={allowDrop}
-          onDrop={handleDropBet("insurance")}
-        >
-          <p className="text-sm">Insurance</p>
-          <p className="text-sm">${bets.insurance}</p>
-        </div>*/}
+        <BetCircle
+          betType="main"
+          betAmount={bets.main}
+          onDropChip={handleDropChip}
+        />
+        <BetCircle
+          betType="fortune"
+          betAmount={bets.fortune}
+          onDropChip={handleDropChip}
+        />
       </div>
-      
+
       {payoutBreakdown && (
         <div className="mt-4 p-2 border border-gray-400">
           <h3 className="font-bold">Last Round Payouts</h3>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { dealHands, compareHands } from "./utils/gameLogic";
 import { evaluate2CardHand } from "./utils/twoCardEvaluator";
 import { evaluate5CardHand } from "./utils/pokerEvaluator";
@@ -11,6 +11,8 @@ import { settleAllBets } from "./utils/payouts";
 import { describe2CardHand } from "./utils/twoCardDescriptions";
 import { describe5CardHand } from "./utils/fiveCardDescriptions";
 import BlogIndex from "./utils/BlogIndex";
+import DropZone from "./utils/DropZone";
+import DraggableCard from "./utils/DraggableCard";
 
 
 export default function Home() {
@@ -163,68 +165,32 @@ export default function Home() {
 
   // --- DRAG & DROP HANDLERS ---
 
-  // We'll store the "dragged card" in a ref or in a dataTransfer
-  function handleDragStart(e, cardIndex) {
-    // We pass the cardIndex in the dataTransfer
-    e.dataTransfer.setData("source", "pool");
-    e.dataTransfer.setData("cardIndex", cardIndex.toString());
-  }
-
-  function handleDragStartFromLow(e, cardIndex) {
-    e.dataTransfer.setData("source", "low");
-    e.dataTransfer.setData("cardIndex", cardIndex.toString());
-  }
-
-  // This is needed to allow a drop (default is "not allowed")
-  function handleDragOver(e) {
-    e.preventDefault();
-    e.stopPropagation();
-  }
-
-  function handleDropLow(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    const source = e.dataTransfer.getData("source");
-    const cardIndexStr = e.dataTransfer.getData("cardIndex");
-    if (!cardIndexStr) return;
-    
-    const cardIndex = parseInt(cardIndexStr, 10);
-  
-    // Only handle if source is "pool"
-    if (source === "pool") {
+  const handleDropToLow = useCallback((item) => {
+    console.log("IN handleDropToLow => item:", item);
+    console.log("playerPool:", playerPool);
+    console.log("playerPool length:", playerPool.length);
+console.log("index:", item.index);
+    // item = { index, source }
+    if (item.source === "pool") {
+      // move card from playerPool -> playerLow
       if (playerLow.length >= 2) return;
-  
-      const card = playerPool[cardIndex];
+      const card = playerPool[item.index];
+      console.log("card: ", card)
       if (!card) return;
-  
-      setPlayerPool((prev) => prev.filter((_, i) => i !== cardIndex));
+      setPlayerPool((prev) => prev.filter((_, i) => i !== item.index));
       setPlayerLow((prev) => [...prev, card]);
+      console.log("player low hand is:", playerLow)
     }
-  }
-
-  function handleDropPool(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    // Get the 'source' array and 'cardIndex'
-    const source = e.dataTransfer.getData("source");
-    const cardIndexStr = e.dataTransfer.getData("cardIndex");
-    if (!cardIndexStr) return;
+  }, [playerLow, playerPool]);
   
-    const cardIndex = parseInt(cardIndexStr, 10);
-  
-    // If the source is the low area, move from low to pool
-    if (source === "low") {
-      const card = playerLow[cardIndex];
+  function handleDropToPool(item) {
+    if (item.source === "low") {
+      // move card from playerLow -> playerPool
+      const card = playerLow[item.index];
       if (!card) return;
-  
-      // Remove from low
-      setPlayerLow(prev => prev.filter((_, i) => i !== cardIndex));
-      // Add to pool
-      setPlayerPool(prev => [...prev, card]);
+      setPlayerLow((prev) => prev.filter((_, i) => i !== item.index));
+      setPlayerPool((prev) => [...prev, card]);
     }
-  
-    // If the source === "pool", do nothing (or handle differently).
   }
 
   return (
@@ -299,21 +265,24 @@ export default function Home() {
         </p>
         <p className="text-sm mb-2">{player2Description}</p>
 
-        <div
+        <DropZone
           className="flex flex-wrap gap-2 p-4 border border-dashed border-gray-500 bg-gray-100 min-h-[120px]"
-          onDragOver={handleDragOver}
-          onDrop={handleDropLow}
+          onDropCard={(item) => {
+            let selectedCard;
+            setPlayerPool((prevPool) => {
+              selectedCard = prevPool[item.index];
+              if (!selectedCard) return prevPool;
+              return prevPool.filter((_, i) => i !== item.index);
+            });
+            if (selectedCard) {
+              setPlayerLow((prevLow) => [...prevLow, selectedCard]);
+            }
+          }}
         >
           {playerLow.map((card, i) => (
-            <div
-              key={i}
-              draggable
-              onDragStart={(e) => handleDragStartFromLow(e, i)}
-            >
-              <Card card={card} faceUp />
-            </div>
+            <DraggableCard key={i} card={card} index={i} source="low" />
           ))}
-        </div>
+        </DropZone>
       </section>
 
       {/* Player's "pool" - the 7 (or fewer) cards you haven't placed yet */}
@@ -323,21 +292,24 @@ export default function Home() {
         <p className="text-sm mb-2">
           Drag from here into your 2-card hand above.
         </p>
-        <div 
+        <DropZone
           className="flex flex-wrap gap-2"
-          onDragOver={handleDragOver}
-          onDrop={handleDropPool}
+          onDropCard={(item) => {
+            let selectedCard;
+            setPlayerLow((prevLow) => {
+              selectedCard = prevLow[item.index];
+              if (!selectedCard) return prevPool;
+              return prevLow.filter((_, i) => i !== item.index);
+            });
+            if (selectedCard) {
+              setPlayerPool((prevPool) => [...prevPool, selectedCard]);
+            }
+          }}
         >
           {playerPool.map((card, index) => (
-            <div
-              key={index}
-              draggable
-              onDragStart={(e) => handleDragStart(e, index)}
-            >
-              <Card card={card} faceUp />
-            </div>
+            <DraggableCard key={index} card={card} index={index} source="pool" />
           ))}
-        </div>
+        </DropZone>
       </section>
 
       {/* Result */}
