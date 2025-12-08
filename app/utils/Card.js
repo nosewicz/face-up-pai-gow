@@ -44,13 +44,9 @@ export default function Card({ card, faceUp = true, selected = false }) {
     );
   }
 
-  // For face-up, highlight if `selected`
-  const borderClass = selected
-    ? "border-4 border-green-400"
-    : "border border-gray-300";
-
+  
+  const borderClass = "border-4 border-green-400";
     
-
   const filename = `${card.rank}${card.suit}.png`; 
 
   return (
