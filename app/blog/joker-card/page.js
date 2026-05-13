@@ -1,19 +1,13 @@
-"use client";
-
-import Head from "next/head";
 import Link from "next/link";
+
+export const metadata = {
+  title: 'The Joker Card in Pai Gow Poker | Tips & Tricks',
+  description: "Learn how the Joker card works in Pai Gow Poker. It's semi-wild, helping form straights, flushes, or acting as an Ace.",
+};
 
 export default function JokerCardPost() {
   return (
     <>
-      <Head>
-        <title>The Joker Card in Pai Gow Poker | Tips & Tricks</title>
-        <meta
-          name="description"
-          content="Learn how the Joker card works in Pai Gow Poker. It's semi-wild, helping form straights, flushes, or acting as an Ace."
-        />
-      </Head>
-
       <main className="max-w-4xl mx-auto p-4">
         <h1 className="text-3xl font-bold mb-4">
           The Joker Card in Pai Gow Poker: How It Works & Why It Matters
@@ -24,7 +18,7 @@ export default function JokerCardPost() {
           twist. Unlike other wild cards that can substitute for any rank or
           suit, the Pai Gow Joker is considered <strong>semi-wild</strong>. It
           primarily acts as an Ace—unless it can complete a flush or a straight
-          in your five-card hand. In this post, we’ll break down exactly how the
+          in your five-card hand. In this post, we&rsquo;ll break down exactly how the
           Joker card functions and how you can use it to gain an edge in both
           standard and <strong>Face-Up Pai Gow</strong>.
         </p>
@@ -34,7 +28,7 @@ export default function JokerCardPost() {
         </h2>
         <p className="mb-4">
           In many poker variants, a wild card can become any rank or suit. In <strong>Pai Gow Poker</strong>, the Joker is more limited. By default,
-          it’s treated as an Ace. However, if you’re just one card away from
+          it&rsquo;s treated as an Ace. However, if you&rsquo;re just one card away from
           completing a flush or a straight, the Joker can fill that slot,
           effectively turning into the rank and suit you need for that 5-card
           combination.
@@ -51,7 +45,7 @@ export default function JokerCardPost() {
           <li>
             <strong>Straight Filling:</strong> Missing one rank in a 5-card
             straight? The Joker becomes that missing rank. For instance, if
-            you’re holding 9, 10, J, Q, Joker, you effectively have a straight.
+            you&rsquo;re holding 9, 10, J, Q, Joker, you effectively have a straight.
           </li>
           <li>
             <strong>Ace High Card:</strong> If the Joker can’t help form
@@ -69,7 +63,7 @@ export default function JokerCardPost() {
           example, if your 7-card distribution has a single 7 plus the Joker, 
           you can form a <strong>Pair of 7s</strong> in your low hand, leaving
           a potentially stronger 5-card hand for the high. This is especially
-          useful in <strong>Face-Up Pai Gow</strong> once you see the dealer’s
+          useful in <strong>Face-Up Pai Gow</strong> once you see the dealer&rsquo;s
           arrangement.
         </p>
 
@@ -81,7 +75,7 @@ export default function JokerCardPost() {
           Our free <strong><Link href="/" className="text-blue-600 hover:underline">Pai Gow Poker trainer</Link></strong> replicates real-game
           scenarios, allowing you to experiment with Joker placements. Whether
           you want to complete a big hand in your 5-card or form a vital pair in
-          your 2-card, you can see how your decision compares to the dealer’s
+          your 2-card, you can see how your decision compares to the dealer&rsquo;s
           final layout—especially in <strong>Face-Up Pai Gow</strong> where you
           see the house way in action.
         </p>
@@ -97,7 +91,7 @@ export default function JokerCardPost() {
           </li>
           <li>
             If forming a major combo is impossible, see if placing the Joker in
-            your 2-card hand to form a pair helps you beat the dealer’s low
+            your 2-card hand to form a pair helps you beat the dealer&rsquo;s low
             hand.
           </li>
           <li>

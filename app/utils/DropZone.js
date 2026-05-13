@@ -12,6 +12,7 @@ export default function DropZone({
   const [{ isOver }, dropRef] = useDrop(() => ({
     accept: ITEM_TYPES.CARD,
     drop: (item) => {
+      // item = { index, source } from DraggableCard
       if (onDropCard) {
         onDropCard(item);
       }

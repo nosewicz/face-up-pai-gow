@@ -20,7 +20,7 @@ export default function Header() {
             Blog
           </Link>
           <Link href="/blog/beginner-pai-gow" className="hover:text-yellow-300">
-            Beginner's Guide
+            Beginner&rsquo;s Guide
           </Link>
           {/* Add more if needed */}
         </nav>

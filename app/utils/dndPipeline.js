@@ -12,10 +12,12 @@ import {
 export const HTML5toTouch = {
   backends: [
     {
+      id: "html5",
       backend: HTML5Backend,
       transition: HTML5DragTransition,
     },
     {
+      id: "touch",
       backend: TouchBackend,
       options: { enableMouseEvents: true },
       transition: TouchTransition,

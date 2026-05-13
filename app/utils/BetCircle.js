@@ -7,7 +7,7 @@ export default function BetCircle({ betType, betAmount, onDropChip }) {
   // onDropChip is a callback that receives (betType, chipValue)
   const [{ isOver }, dropRef] = useDrop(() => ({
     accept: ITEM_TYPES.CHIP,
-    drop: (item, monitor) => {
+    drop: (item) => {
       // item = { chipValue: number }
       if (onDropChip) {
         onDropChip(betType, item.chipValue);

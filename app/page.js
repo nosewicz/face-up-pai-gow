@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { dealHands, compareHands } from "./utils/gameLogic";
 import { evaluate2CardHand } from "./utils/twoCardEvaluator";
 import { evaluate5CardHand } from "./utils/pokerEvaluator";
@@ -135,17 +135,12 @@ export default function Home() {
       mainResult = "PUSH";
     }
 
-    let player7Cards = originalPlayerHand
-
-    console.log("Compare: old bankroll=", bankroll, "bets=", bets);
     const { newRoll, breakdown } = settleAllBets({
       bankroll,
       bets,
       mainResult,
       player7Cards: originalPlayerHand
     });
-    console.log("Compare: newRoll=", newRoll);
-
     setBankroll(newRoll);
 
     // Once the round ends, remember these bets as "last round bets"
@@ -166,31 +161,25 @@ export default function Home() {
 
   // --- DRAG & DROP HANDLERS ---
 
-  const handleDropToLow = useCallback((item) => {
+  function moveCardToLow(item) {
     if (item.source !== "pool" || playerLow.length >= 2) return;
 
-    const card = playerPool[item.index];
-    if (!card || getCardKey(card) !== getCardKey(item.card)) return;
+    const selectedCard = playerPool[item.index];
+    if (!selectedCard) return;
 
-    setPlayerPool((prev) => prev.filter((_, i) => i !== item.index));
-    setPlayerLow((prev) => [...prev, card]);
-  }, [playerLow, playerPool]);
-  
-  const handleDropToPool = useCallback((item) => {
+    setPlayerPool((prevPool) => prevPool.filter((_, i) => i !== item.index));
+    setPlayerLow((prevLow) => [...prevLow, selectedCard]);
+  }
+
+  function moveCardToPool(item) {
     if (item.source !== "low") return;
 
-    const card = playerLow[item.index];
-    if (!card || getCardKey(card) !== getCardKey(item.card)) return;
+    const selectedCard = playerLow[item.index];
+    if (!selectedCard) return;
 
-    setPlayerLow((prev) => prev.filter((_, i) => i !== item.index));
-    setPlayerPool((prev) => [...prev, card]);
-  }, [playerLow]);
-
-  const canDropToLow = useCallback((item) => (
-    item.source === "pool" && playerLow.length < 2
-  ), [playerLow.length]);
-
-  const canDropToPool = useCallback((item) => item.source === "low", []);
+    setPlayerLow((prevLow) => prevLow.filter((_, i) => i !== item.index));
+    setPlayerPool((prevPool) => [...prevPool, selectedCard]);
+  }
 
   return (
     <main className="max-w-6xl mx-auto p-4 flex flex-col-reverse gap-4 md:flex-row">
@@ -266,8 +255,8 @@ export default function Home() {
 
         <DropZone
           className="flex flex-wrap gap-2 p-4 border border-dashed border-gray-500 bg-gray-100 min-h-[120px]"
-          onDropCard={handleDropToLow}
-          canDropItem={canDropToLow}
+          onDropCard={moveCardToLow}
+          canDropItem={(item) => item.source === "pool" && playerLow.length < 2}
         >
           {playerLow.map((card, i) => (
             <DraggableCard key={getCardKey(card)} card={card} index={i} source="low" />
@@ -284,8 +273,8 @@ export default function Home() {
         </p>
         <DropZone
           className="flex flex-wrap gap-2"
-          onDropCard={handleDropToPool}
-          canDropItem={canDropToPool}
+          onDropCard={moveCardToPool}
+          canDropItem={(item) => item.source === "low"}
         >
           {playerPool.map((card, index) => (
             <DraggableCard key={getCardKey(card)} card={card} index={index} source="pool" />
