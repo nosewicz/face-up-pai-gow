@@ -16,6 +16,36 @@ import DraggableCard from "./utils/DraggableCard";
 
 const getCardKey = (card) => `${card.rank}-${card.suit ?? "joker"}`;
 
+function EmptyCardSlots({ count = 2 }) {
+  return Array.from({ length: count }).map((_, index) => (
+    <div
+      key={index}
+      className="h-[clamp(4.875rem,18vw,7.5rem)] w-[clamp(3.25rem,12vw,5rem)] rounded-md border border-dashed border-amber-100/30 bg-black/10"
+    />
+  ));
+}
+
+function TableHand({ title, subtitle, description, children, className = "" }) {
+  return (
+    <section className={`min-w-0 ${className}`}>
+      <div className="mb-2 flex items-end justify-between gap-3">
+        <div>
+          <h2 className="text-xs font-black uppercase tracking-[0.22em] text-amber-100">{title}</h2>
+          {subtitle && <p className="text-[0.7rem] uppercase tracking-[0.16em] text-emerald-100/65">{subtitle}</p>}
+        </div>
+        {description && (
+          <p className="max-w-[12rem] truncate text-right text-xs font-semibold text-amber-50/80">{description}</p>
+        )}
+      </div>
+      <div className="min-h-[clamp(5.75rem,22vw,9rem)] rounded-md border border-white/10 bg-emerald-950/45 p-2 shadow-inner">
+        <div className="flex min-h-[clamp(4.875rem,18vw,7.5rem)] flex-wrap items-center gap-2">
+          {children}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function Home() {
   // Dealer states
   const [dealerLow, setDealerLow] = useState([]);
@@ -141,6 +171,7 @@ export default function Home() {
       mainResult,
       player7Cards: originalPlayerHand
     });
+
     setBankroll(newRoll);
 
     // Once the round ends, remember these bets as "last round bets"
@@ -182,129 +213,134 @@ export default function Home() {
   }
 
   return (
-    <main className="max-w-6xl mx-auto p-4 flex flex-col-reverse gap-4 md:flex-row">
+    <main className="min-h-screen bg-[#10100d] px-3 py-4 text-white md:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-7xl flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,1fr)_20rem]">
+        <section className="relative overflow-hidden rounded-[2rem] border-[10px] border-[#5a3218] bg-[#07563c] p-3 shadow-2xl ring-4 ring-[#2b170d] md:p-6">
+          <div className="pointer-events-none absolute inset-3 rounded-[1.4rem] border border-amber-200/25" />
+          <div className="relative z-10">
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.28em] text-amber-200/80">PaiGowLab</p>
+                <h1 className="text-2xl font-black tracking-wide text-amber-50 md:text-4xl">Face-Up Pai Gow Poker</h1>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleDeal}
+                  className="rounded bg-amber-300 px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-emerald-950 shadow-lg transition hover:bg-amber-200"
+                >
+                  Deal
+                </button>
+                <button
+                  onClick={handleCompare}
+                  disabled={!canCompare}
+                  className={`rounded px-5 py-3 text-sm font-black uppercase tracking-[0.14em] shadow-lg transition ${
+                    canCompare
+                      ? "bg-white text-emerald-950 hover:bg-amber-100"
+                      : "bg-white/20 text-white/45"
+                  }`}
+                >
+                  Compare
+                </button>
+              </div>
+            </div>
 
+            <div className="mb-4 rounded-md border border-amber-200/25 bg-black/18 px-3 py-2 text-center text-xs font-semibold text-amber-50/80 sm:hidden">
+              Rotate horizontally for the full table view.
+            </div>
 
-      <div className="flex-auto md:basis-1/4">
-      <WagerPanel
-        bankroll={bankroll}
-        setBankroll={setBankroll}
-        bets={bets}
-        setBets={setBets}
-        lastRoundBets={lastRoundBets}
-        payoutBreakdown={payoutBreakdown} 
-      />
+            {result && (
+              <div
+                className={`mb-4 rounded-md border px-4 py-3 text-center text-xl font-black uppercase tracking-[0.16em] ${
+                  result.includes("PLAYER")
+                    ? "border-emerald-200/40 bg-emerald-300/20 text-emerald-50"
+                    : result.includes("DEALER")
+                    ? "border-red-200/40 bg-red-500/20 text-red-50"
+                    : "border-amber-200/50 bg-amber-300/20 text-amber-50"
+                }`}
+              >
+                {result}
+              </div>
+            )}
 
-      <BlogIndex />
+            <div className="grid gap-4 xl:grid-cols-[minmax(12rem,0.6fr)_minmax(0,1fr)]">
+              <TableHand title="Dealer Low" subtitle="2-card hand" description={dealer2Description}>
+                {dealerLow.length ? dealerLow.map((card) => (
+                  <Card key={getCardKey(card)} card={card} faceUp />
+                )) : <EmptyCardSlots count={2} />}
+              </TableHand>
+
+              <TableHand title="Dealer High" subtitle="5-card hand" description={dealer5Description}>
+                {dealerHigh.length ? dealerHigh.map((card) => (
+                  <Card key={getCardKey(card)} card={card} faceUp />
+                )) : <EmptyCardSlots count={5} />}
+              </TableHand>
+            </div>
+
+            <div className="my-4 flex items-center gap-3 text-amber-100/50">
+              <div className="h-px flex-1 bg-amber-100/20" />
+              <span className="text-[0.65rem] font-black uppercase tracking-[0.28em]">Player</span>
+              <div className="h-px flex-1 bg-amber-100/20" />
+            </div>
+
+            <div className="grid gap-4 xl:grid-cols-[minmax(12rem,0.6fr)_minmax(0,1fr)]">
+              <section className="min-w-0">
+                <div className="mb-2 flex items-end justify-between gap-3">
+                  <div>
+                    <h2 className="text-xs font-black uppercase tracking-[0.22em] text-amber-100">Your Low</h2>
+                    <p className="text-[0.7rem] uppercase tracking-[0.16em] text-emerald-100/65">Drop 2 cards</p>
+                  </div>
+                  {player2Description && <p className="truncate text-right text-xs font-semibold text-amber-50/80">{player2Description}</p>}
+                </div>
+                <DropZone
+                  className="min-h-[clamp(5.75rem,22vw,9rem)] rounded-md border border-dashed border-amber-100/45 bg-emerald-950/60 p-2 shadow-inner"
+                  onDropCard={handleDropToLow}
+                  canDropItem={canDropToLow}
+                >
+                  <div className="flex min-h-[clamp(4.875rem,18vw,7.5rem)] flex-wrap items-center gap-2">
+                    {playerLow.length ? playerLow.map((card, i) => (
+                      <DraggableCard key={getCardKey(card)} card={card} index={i} source="low" />
+                    )) : <EmptyCardSlots count={2} />}
+                  </div>
+                </DropZone>
+              </section>
+
+              <section className="min-w-0">
+                <div className="mb-2 flex items-end justify-between gap-3">
+                  <div>
+                    <h2 className="text-xs font-black uppercase tracking-[0.22em] text-amber-100">Your High</h2>
+                    <p className="text-[0.7rem] uppercase tracking-[0.16em] text-emerald-100/65">Remaining cards</p>
+                  </div>
+                  {player5Description && <p className="truncate text-right text-xs font-semibold text-amber-50/80">{player5Description}</p>}
+                </div>
+                <DropZone
+                  className="min-h-[clamp(5.75rem,22vw,9rem)] rounded-md border border-white/10 bg-emerald-950/45 p-2 shadow-inner"
+                  onDropCard={handleDropToPool}
+                  canDropItem={canDropToPool}
+                >
+                  <div className="flex min-h-[clamp(4.875rem,18vw,7.5rem)] flex-wrap items-center gap-2">
+                    {playerPool.length ? playerPool.map((card, index) => (
+                      <DraggableCard key={getCardKey(card)} card={card} index={index} source="pool" />
+                    )) : <EmptyCardSlots count={7} />}
+                  </div>
+                </DropZone>
+              </section>
+            </div>
+          </div>
+        </section>
+
+        <div className="flex flex-col gap-4">
+          <WagerPanel
+            bankroll={bankroll}
+            bets={bets}
+            setBets={setBets}
+            lastRoundBets={lastRoundBets}
+            payoutBreakdown={payoutBreakdown}
+          />
+          <div className="rounded-lg bg-white text-slate-950 shadow-xl">
+            <BlogIndex />
+          </div>
+        </div>
       </div>
-
-      <div className="flex-auto md:basis-3/4">
-      
-      <h1 className="text-2xl font-bold text-center mb-4">
-        Face-Up Pai Gow Poker
-      </h1>
-
-      {/* Buttons */}
-      <div className="flex justify-center gap-4 mb-6">
-        <button
-          onClick={handleDeal}
-          className="px-4 py-2 bg-blue-600 text-white font-semibold rounded hover:bg-blue-700 transition"
-        >
-          Deal
-        </button>
-        <button
-          onClick={handleCompare}
-          disabled={!canCompare}
-          className={`px-4 py-2 font-semibold rounded transition
-            ${canCompare
-              ? "bg-green-600 text-white hover:bg-green-700"
-              : "bg-gray-400 text-gray-800 cursor-not-allowed"
-            }`}
-        >
-          Compare
-        </button>
-      </div>
-
-      {/* Dealer's Arranged Hands */}
-      <section className="mb-6">
-        <h2 className="text-xl font-semibold mb-2">Dealer’s 2-Card Hand</h2>
-        <p className="text-sm mb-2">{dealer2Description}</p>
-        <div className="flex flex-wrap gap-2 mb-4">
-          {dealerLow.map((card, i) => (
-            <Card key={i} card={card} faceUp />
-          ))}
-        </div>
-
-        <h2 className="text-xl font-semibold mb-2">Dealer’s 5-Card Hand</h2>
-        <p className="text-sm mb-2">{dealer5Description}</p>
-        <div className="flex flex-wrap gap-2">
-          {dealerHigh.map((card, i) => (
-            <Card key={i} card={card} faceUp />
-          ))}
-        </div>
-      </section>
-
-      {/* Player's 2-card hand (drop zone) */}
-      <section className="mb-6">
-        <h2 className="text-xl font-semibold mb-2">Your 2-Card Hand</h2>
-        <p className="text-sm mb-2">
-          Drag cards here to form your 2-card low hand. Once you have 2, the rest 
-          automatically forms your 5-card high hand.
-        </p>
-        <p className="text-sm mb-2">{player2Description}</p>
-
-        <DropZone
-          className="flex flex-wrap gap-2 p-4 border border-dashed border-gray-500 bg-gray-100 min-h-[120px]"
-          onDropCard={moveCardToLow}
-          canDropItem={(item) => item.source === "pool" && playerLow.length < 2}
-        >
-          {playerLow.map((card, i) => (
-            <DraggableCard key={getCardKey(card)} card={card} index={i} source="low" />
-          ))}
-        </DropZone>
-      </section>
-
-      {/* Player's "pool" - the 7 (or fewer) cards you haven't placed yet */}
-      <section className="mb-6">
-        <h2 className="text-xl font-semibold mb-2">Your Remaining Cards</h2>
-        <p className="text-sm mb-2">{player5Description}</p>
-        <p className="text-sm mb-2">
-          Drag from here into your 2-card hand above.
-        </p>
-        <DropZone
-          className="flex flex-wrap gap-2"
-          onDropCard={moveCardToPool}
-          canDropItem={(item) => item.source === "low"}
-        >
-          {playerPool.map((card, index) => (
-            <DraggableCard key={getCardKey(card)} card={card} index={index} source="pool" />
-          ))}
-        </DropZone>
-      </section>
-
-      {/* Result */}
-      {result && (
-        <div className="text-center mt-4">
-          <h2
-            className={`text-2xl font-bold 
-            ${
-              result.includes("PLAYER")
-                ? "text-green-600"
-                : result.includes("DEALER")
-                ? "text-red-600"
-                : "text-yellow-600"
-            }`}
-          >
-            {result}
-          </h2>
-        </div>
-        
-      )}
-
-    </div>
-      
-      
     </main>
-    
   );
 }
