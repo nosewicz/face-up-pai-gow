@@ -1,4 +1,5 @@
 const categoryMap = {
+  11: "Five Aces",
   10: "Royal Flush",
   9: "Straight Flush",
   8: "Four of a Kind",

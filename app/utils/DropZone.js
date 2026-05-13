@@ -9,19 +9,14 @@ export default function DropZone({
   canDropItem,
   className,
 }) {
-  // onDropCard is a callback we call when a card is dropped
-  // canDropItem is optional if you want to filter
   const [{ isOver }, dropRef] = useDrop(() => ({
     accept: ITEM_TYPES.CARD,
-    drop: (item, monitor) => {
-      // item = { index, source } from DraggableCard
-      console.log("DropZone drop fired with:", item);
+    drop: (item) => {
       if (onDropCard) {
-        console.log("Calling onDropCard now...");
         onDropCard(item);
       }
     },
-    canDrop: (item, monitor) => {
+    canDrop: (item) => {
       if (canDropItem) {
         return canDropItem(item);
       }
@@ -30,7 +25,7 @@ export default function DropZone({
     collect: (monitor) => ({
       isOver: monitor.isOver(),
     }),
-  }));
+  }), [onDropCard, canDropItem]);
 
   const backgroundColor = isOver ? "#f0f0f0" : "transparent";
 

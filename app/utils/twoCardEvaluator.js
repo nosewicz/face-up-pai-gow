@@ -13,11 +13,8 @@
  *   where "tiebreaks" is an array in descending order for easy comparison.
  *
  * Joker rules (Pai Gow):
- * - If exactly 1 Joker is present and the other card is rank X, 
- *   the Joker can become that rank => forms a pair (X, X).
- * - If 2 Jokers are present (rare in standard single-Joker Pai Gow, but let's handle it),
- *   treat it as a pair of Aces (strongest possible pair in 2-card).
- * - Otherwise, the Joker is treated as an Ace (rank=14) in a high-card scenario.
+ * - In a 2-card hand, the Joker is ranked as an Ace.
+ * - It can make a pair only with a natural Ace.
  */
 
 /** Evaluate a 2-card hand, returns { category, tiebreaks } */
@@ -61,15 +58,17 @@ export function evaluate2CardHand(cards) {
 
   // Case B: 1 Joker
   if (jokers === 1 && normalCards.length === 1) {
-    // We have 1 normal card + 1 Joker
-    // The Joker can become the same rank => form a pair
-    // OR we might treat it as Ace if that rank is also Ace, still a pair of Aces
-    // So effectively, it's always a pair matching the normal card (best outcome).
     const cardVal = normalCards[0].value;
-    // That forms a pair
+    if (cardVal === 14) {
+      return {
+        category: 2,
+        tiebreaks: [14],
+      };
+    }
+
     return {
-      category: 2,
-      tiebreaks: [cardVal], // e.g. if normal card is 10 => pair of 10s
+      category: 1,
+      tiebreaks: [14, cardVal],
     };
   }
 

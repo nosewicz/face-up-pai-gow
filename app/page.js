@@ -14,6 +14,7 @@ import BlogIndex from "./utils/BlogIndex";
 import DropZone from "./utils/DropZone";
 import DraggableCard from "./utils/DraggableCard";
 
+const getCardKey = (card) => `${card.rank}-${card.suit ?? "joker"}`;
 
 export default function Home() {
   // Dealer states
@@ -166,32 +167,30 @@ export default function Home() {
   // --- DRAG & DROP HANDLERS ---
 
   const handleDropToLow = useCallback((item) => {
-    console.log("IN handleDropToLow => item:", item);
-    console.log("playerPool:", playerPool);
-    console.log("playerPool length:", playerPool.length);
-console.log("index:", item.index);
-    // item = { index, source }
-    if (item.source === "pool") {
-      // move card from playerPool -> playerLow
-      if (playerLow.length >= 2) return;
-      const card = playerPool[item.index];
-      console.log("card: ", card)
-      if (!card) return;
-      setPlayerPool((prev) => prev.filter((_, i) => i !== item.index));
-      setPlayerLow((prev) => [...prev, card]);
-      console.log("player low hand is:", playerLow)
-    }
+    if (item.source !== "pool" || playerLow.length >= 2) return;
+
+    const card = playerPool[item.index];
+    if (!card || getCardKey(card) !== getCardKey(item.card)) return;
+
+    setPlayerPool((prev) => prev.filter((_, i) => i !== item.index));
+    setPlayerLow((prev) => [...prev, card]);
   }, [playerLow, playerPool]);
   
-  function handleDropToPool(item) {
-    if (item.source === "low") {
-      // move card from playerLow -> playerPool
-      const card = playerLow[item.index];
-      if (!card) return;
-      setPlayerLow((prev) => prev.filter((_, i) => i !== item.index));
-      setPlayerPool((prev) => [...prev, card]);
-    }
-  }
+  const handleDropToPool = useCallback((item) => {
+    if (item.source !== "low") return;
+
+    const card = playerLow[item.index];
+    if (!card || getCardKey(card) !== getCardKey(item.card)) return;
+
+    setPlayerLow((prev) => prev.filter((_, i) => i !== item.index));
+    setPlayerPool((prev) => [...prev, card]);
+  }, [playerLow]);
+
+  const canDropToLow = useCallback((item) => (
+    item.source === "pool" && playerLow.length < 2
+  ), [playerLow.length]);
+
+  const canDropToPool = useCallback((item) => item.source === "low", []);
 
   return (
     <main className="max-w-6xl mx-auto p-4 flex flex-col-reverse gap-4 md:flex-row">
@@ -267,20 +266,11 @@ console.log("index:", item.index);
 
         <DropZone
           className="flex flex-wrap gap-2 p-4 border border-dashed border-gray-500 bg-gray-100 min-h-[120px]"
-          onDropCard={(item) => {
-            let selectedCard;
-            setPlayerPool((prevPool) => {
-              selectedCard = prevPool[item.index];
-              if (!selectedCard) return prevPool;
-              return prevPool.filter((_, i) => i !== item.index);
-            });
-            if (selectedCard) {
-              setPlayerLow((prevLow) => [...prevLow, selectedCard]);
-            }
-          }}
+          onDropCard={handleDropToLow}
+          canDropItem={canDropToLow}
         >
           {playerLow.map((card, i) => (
-            <DraggableCard key={i} card={card} index={i} source="low" />
+            <DraggableCard key={getCardKey(card)} card={card} index={i} source="low" />
           ))}
         </DropZone>
       </section>
@@ -294,20 +284,11 @@ console.log("index:", item.index);
         </p>
         <DropZone
           className="flex flex-wrap gap-2"
-          onDropCard={(item) => {
-            let selectedCard;
-            setPlayerLow((prevLow) => {
-              selectedCard = prevLow[item.index];
-              if (!selectedCard) return prevLow;
-              return prevLow.filter((_, i) => i !== item.index);
-            });
-            if (selectedCard) {
-              setPlayerPool((prevPool) => [...prevPool, selectedCard]);
-            }
-          }}
+          onDropCard={handleDropToPool}
+          canDropItem={canDropToPool}
         >
           {playerPool.map((card, index) => (
-            <DraggableCard key={index} card={card} index={index} source="pool" />
+            <DraggableCard key={getCardKey(card)} card={card} index={index} source="pool" />
           ))}
         </DropZone>
       </section>
