@@ -1,19 +1,13 @@
-"use client";
-
-import Head from "next/head";
 import Link from "next/link";
+
+export const metadata = {
+  title: 'Face-Up Pai Gow Poker | Free Practice & Online Trainer',
+  description: 'Discover Face-Up Pai Gow Poker. Learn how to play, see the dealer’s cards, and practice for free with our online trainer.',
+};
 
 export default function FaceUpPaiGow() {
   return (
     <>
-      <Head>
-        <title>Face-Up Pai Gow Poker | Free Practice & Online Trainer</title>
-        <meta
-          name="description"
-          content="Discover Face-Up Pai Gow Poker. Learn how to play, see the dealer’s cards, and practice for free with our online trainer."
-        />
-      </Head>
-
       <main className="max-w-4xl mx-auto p-4">
         <h1 className="text-3xl font-bold mb-4">
           Face-Up Pai Gow Poker: Everything You Need to Know
@@ -21,9 +15,9 @@ export default function FaceUpPaiGow() {
 
         <p className="mb-4">
           <strong>Face-Up Pai Gow</strong> is a unique variation of Pai Gow
-          Poker where the dealer’s cards are fully visible. This adds a new
+          Poker where the dealer&rsquo;s cards are fully visible. This adds a new
           dimension to the game, letting you set your hands with full knowledge
-          of what you’re up against. On this page, we’ll break down how Face-Up
+          of what you&rsquo;re up against. On this page, we&rsquo;ll break down how Face-Up
           differs from standard Pai Gow and how you can <strong>practice</strong> using our free online trainer.
         </p>
 
@@ -32,8 +26,8 @@ export default function FaceUpPaiGow() {
         </h2>
         <p className="mb-4">
           In <strong>standard Pai Gow</strong>, both your seven cards and the
-          dealer’s seven cards are hidden. In <em>Face-Up Pai Gow</em>, the
-          dealer’s 7-card set is dealt face up. This means you can see exactly
+          dealer&rsquo;s seven cards are hidden. In <em>Face-Up Pai Gow</em>, the
+          dealer&rsquo;s 7-card set is dealt face up. This means you can see exactly
           how the dealer arranges their high and low hands (often following the
           “house way”). This extra info can guide how you set your own two-card
           and five-card hands, creating a more strategic experience.
@@ -44,7 +38,7 @@ export default function FaceUpPaiGow() {
         </h2>
         <ul className="list-disc list-inside mb-4">
           <li>
-            <strong>Better Informed Decisions:</strong> Knowing the dealer’s
+            <strong>Better Informed Decisions:</strong> Knowing the dealer&rsquo;s
             hand allows more strategic moves for your own split.
           </li>
           <li>
@@ -59,17 +53,17 @@ export default function FaceUpPaiGow() {
 
         <h2 className="text-xl font-semibold mt-6 mb-2">Using Our Trainer</h2>
         <p className="mb-4">
-          We’ve designed a <strong><Link href="/" className="text-blue-600 hover:underline">free Face-Up Pai Gow Poker</Link></strong> trainer
+          We&rsquo;ve designed a <strong><Link href="/" className="text-blue-600 hover:underline">free Face-Up Pai Gow Poker</Link></strong> trainer
           so you can familiarize yourself with the open-hand advantage. Simply:
         </p>
         <ol className="list-decimal list-inside mb-4">
           <li>Deal the cards.</li>
           <li>
-            Observe the <strong>dealer’s 7 cards</strong> and how they form their
+            Observe the <strong>dealer&rsquo;s 7 cards</strong> and how they form their
             high and low hands.
           </li>
           <li>Arrange your 7 cards accordingly.</li>
-          <li>Click “Compare” to see if your split beats the dealer’s.</li>
+          <li>Click “Compare” to see if your split beats the dealer&rsquo;s.</li>
         </ol>
 
         <p className="mb-4">
@@ -83,7 +77,7 @@ export default function FaceUpPaiGow() {
         </h2>
         <ul className="list-disc list-inside mb-4">
           <li>
-            Always consider how the house way sets the dealer’s 5-card hand—try
+            Always consider how the house way sets the dealer&rsquo;s 5-card hand—try
             to spot weaknesses you can exploit.
           </li>
           <li>Pay attention to side bets, like the Fortune bonus, for extra payouts.</li>

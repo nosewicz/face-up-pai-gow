@@ -9,7 +9,7 @@ export default function BlogIndex() {
       <ul className="list-disc list-inside space-y-2">
         <li>
           <Link href="/blog/beginner-pai-gow" className="text-blue-600 hover:underline">
-            Beginner's Guide to Pai Gow Poker
+            Beginner&rsquo;s Guide to Pai Gow Poker
           </Link>
         </li>
         <li>

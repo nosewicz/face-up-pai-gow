@@ -1,19 +1,13 @@
-"use client";
-
-import Head from "next/head";
 import Link from "next/link";
+
+export const metadata = {
+  title: '5 Strategies to Improve Your Pai Gow Poker Skills | Free Trainer',
+  description: 'Five key Pai Gow Poker strategies to help you win, from two-card hand splitting to Joker usage. Practice for free in our Face-Up Pai Gow trainer.',
+};
 
 export default function PaiGowStrategies() {
   return (
     <>
-      <Head>
-        <title>5 Strategies to Improve Your Pai Gow Poker Skills | Free Trainer</title>
-        <meta
-          name="description"
-          content="Five key Pai Gow Poker strategies to help you win, from two-card hand splitting to Joker usage. Practice for free in our Face-Up Pai Gow trainer."
-        />
-      </Head>
-
       <main className="max-w-4xl mx-auto p-4">
         <h1 className="text-3xl font-bold mb-4">
           5 Strategies to Improve Your Pai Gow Poker Skills
@@ -21,8 +15,8 @@ export default function PaiGowStrategies() {
 
         <p className="mb-4">
           Want to boost your <strong>Pai Gow Poker</strong> game and beat the
-          dealer more consistently? We’ve got five key tips that will help you
-          strategize—whether you’re playing standard or
+          dealer more consistently? We&rsquo;ve got five key tips that will help you
+          strategize—whether you&rsquo;re playing standard or
           <strong> Face-Up Pai Gow</strong>. Best of all, you can test these
           tips in our <strong>free online trainer</strong> before hitting a
           live table.
@@ -34,7 +28,7 @@ export default function PaiGowStrategies() {
         <p className="mb-4">
           The biggest mistake beginners make is ignoring the impact of the
           two-card low hand. A strong low hand can secure half the battle if it
-          beats the dealer’s low. Use our trainer to see how different splits
+          beats the dealer&rsquo;s low. Use our trainer to see how different splits
           affect your 5-card high hand and 2-card low hand together.
         </p>
 
@@ -52,7 +46,7 @@ export default function PaiGowStrategies() {
           3. Explore the House Way
         </h2>
         <p className="mb-4">
-          Most casinos use a “house way” to set the dealer’s hands. In
+          Most casinos use a “house way” to set the dealer&rsquo;s hands. In
           <strong> Face-Up Pai Gow</strong>, you can see this logic in action.
           By knowing how the house arranges pairs, straights, and flushes, you
           can predict their final layout and adjust yours for maximum edge.

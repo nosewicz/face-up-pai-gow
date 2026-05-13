@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { dealHands, compareHands } from "./utils/gameLogic";
 import { evaluate2CardHand } from "./utils/twoCardEvaluator";
 import { evaluate5CardHand } from "./utils/pokerEvaluator";
@@ -134,17 +134,12 @@ export default function Home() {
       mainResult = "PUSH";
     }
 
-    let player7Cards = originalPlayerHand
-
-    console.log("Compare: old bankroll=", bankroll, "bets=", bets);
     const { newRoll, breakdown } = settleAllBets({
       bankroll,
       bets,
       mainResult,
       player7Cards: originalPlayerHand
     });
-    console.log("Compare: newRoll=", newRoll);
-
     setBankroll(newRoll);
 
     // Once the round ends, remember these bets as "last round bets"
@@ -165,32 +160,24 @@ export default function Home() {
 
   // --- DRAG & DROP HANDLERS ---
 
-  const handleDropToLow = useCallback((item) => {
-    console.log("IN handleDropToLow => item:", item);
-    console.log("playerPool:", playerPool);
-    console.log("playerPool length:", playerPool.length);
-console.log("index:", item.index);
-    // item = { index, source }
-    if (item.source === "pool") {
-      // move card from playerPool -> playerLow
-      if (playerLow.length >= 2) return;
-      const card = playerPool[item.index];
-      console.log("card: ", card)
-      if (!card) return;
-      setPlayerPool((prev) => prev.filter((_, i) => i !== item.index));
-      setPlayerLow((prev) => [...prev, card]);
-      console.log("player low hand is:", playerLow)
-    }
-  }, [playerLow, playerPool]);
-  
-  function handleDropToPool(item) {
-    if (item.source === "low") {
-      // move card from playerLow -> playerPool
-      const card = playerLow[item.index];
-      if (!card) return;
-      setPlayerLow((prev) => prev.filter((_, i) => i !== item.index));
-      setPlayerPool((prev) => [...prev, card]);
-    }
+  function moveCardToLow(item) {
+    if (item.source !== "pool" || playerLow.length >= 2) return;
+
+    const selectedCard = playerPool[item.index];
+    if (!selectedCard) return;
+
+    setPlayerPool((prevPool) => prevPool.filter((_, i) => i !== item.index));
+    setPlayerLow((prevLow) => [...prevLow, selectedCard]);
+  }
+
+  function moveCardToPool(item) {
+    if (item.source !== "low") return;
+
+    const selectedCard = playerLow[item.index];
+    if (!selectedCard) return;
+
+    setPlayerLow((prevLow) => prevLow.filter((_, i) => i !== item.index));
+    setPlayerPool((prevPool) => [...prevPool, selectedCard]);
   }
 
   return (
@@ -267,17 +254,8 @@ console.log("index:", item.index);
 
         <DropZone
           className="flex flex-wrap gap-2 p-4 border border-dashed border-gray-500 bg-gray-100 min-h-[120px]"
-          onDropCard={(item) => {
-            let selectedCard;
-            setPlayerPool((prevPool) => {
-              selectedCard = prevPool[item.index];
-              if (!selectedCard) return prevPool;
-              return prevPool.filter((_, i) => i !== item.index);
-            });
-            if (selectedCard) {
-              setPlayerLow((prevLow) => [...prevLow, selectedCard]);
-            }
-          }}
+          onDropCard={moveCardToLow}
+          canDropItem={(item) => item.source === "pool" && playerLow.length < 2}
         >
           {playerLow.map((card, i) => (
             <DraggableCard key={i} card={card} index={i} source="low" />
@@ -294,17 +272,8 @@ console.log("index:", item.index);
         </p>
         <DropZone
           className="flex flex-wrap gap-2"
-          onDropCard={(item) => {
-            let selectedCard;
-            setPlayerLow((prevLow) => {
-              selectedCard = prevLow[item.index];
-              if (!selectedCard) return prevLow;
-              return prevLow.filter((_, i) => i !== item.index);
-            });
-            if (selectedCard) {
-              setPlayerPool((prevPool) => [...prevPool, selectedCard]);
-            }
-          }}
+          onDropCard={moveCardToPool}
+          canDropItem={(item) => item.source === "low"}
         >
           {playerPool.map((card, index) => (
             <DraggableCard key={index} card={card} index={index} source="pool" />

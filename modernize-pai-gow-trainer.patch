@@ -1,0 +1,1400 @@
+From f2d051cd02c874dca50d734d17c8b550a47d9a0b Mon Sep 17 00:00:00 2001
+From: Codex <codex@openai.com>
+Date: Wed, 13 May 2026 18:41:26 +0000
+Subject: [PATCH] Modernize Pai Gow trainer
+
+---
+ README.md                           |  60 +++++----
+ app/blog/beginner-pai-gow/page.js   |  20 +--
+ app/blog/face-up-pai-gow/page.js    |  34 ++---
+ app/blog/joker-card/page.js         |  28 ++--
+ app/blog/page.js                    |  26 ++--
+ app/blog/pai-gow-strategies/page.js |  24 ++--
+ app/layout.js                       |  13 +-
+ app/page.js                         |  77 ++++-------
+ app/utils/BetCircle.js              |   2 +-
+ app/utils/BlogIndex.js              |   2 +-
+ app/utils/Card.js                   |  62 ++++-----
+ app/utils/DropZone.js               |   6 +-
+ app/utils/Header.js                 |   2 +-
+ app/utils/PolyfillProvider.js       |  25 ----
+ app/utils/WagerPanel.js             |  28 ++--
+ app/utils/dndPipeline.js            |   2 +
+ app/utils/payouts.js                |  43 ++++---
+ app/utils/payouts.test.js           | 181 ++++++++++----------------
+ babel.config.js                     |   6 +
+ jest.config.js                      | 193 +---------------------------
+ package-lock.json                   |   8 --
+ package.json                        |   1 -
+ tailwind.config.mjs                 |   4 +-
+ 23 files changed, 262 insertions(+), 585 deletions(-)
+ delete mode 100644 app/utils/PolyfillProvider.js
+ create mode 100644 babel.config.js
+
+diff --git a/README.md b/README.md
+index f193039..849743d 100644
+--- a/README.md
++++ b/README.md
+@@ -1,37 +1,49 @@
+-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
++# Face-Up Pai Gow Poker Trainer
+ 
+-## Getting Started
++Face-Up Pai Gow Poker Trainer is a free-play Next.js application for learning and practicing Face-Up Pai Gow Poker without risking real money. The app deals a seven-card Pai Gow hand, reveals and arranges the dealer hand with the project’s house-way logic, and asks the player to split their seven cards into a two-card low hand and a five-card high hand.
+ 
+-First, run the development server:
++## Main objective
+ 
+-```bash
+-npm run dev
+-# or
+-yarn dev
+-# or
+-pnpm dev
+-# or
+-bun dev
+-```
++The project’s main objective is to help Pai Gow Poker players practice hand-setting decisions in the Face-Up variant:
+ 
+-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
++- **Learn the split.** Drag two cards into the low hand and leave the remaining five cards as the high hand.
++- **Compare against a visible dealer.** The dealer hand is face up and automatically arranged, making the trainer useful for understanding how dealer pressure changes player decisions.
++- **Catch fouls.** The app checks that the two-card low hand does not outrank the five-card high hand before settlement.
++- **Practice payouts.** A play-money bankroll, main bet, and Fortune side bet show how outcomes affect a round.
++- **Support study content.** Blog pages explain beginner rules, Face-Up Pai Gow, Joker usage, and strategy concepts.
+ 
+-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
++## Tech stack
+ 
+-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
++- Next.js App Router
++- React
++- Tailwind CSS
++- React DnD with HTML5 and touch backends
++- Jest for payout and settlement logic tests
+ 
+-## Learn More
++## Getting started
+ 
+-To learn more about Next.js, take a look at the following resources:
++Install dependencies:
+ 
+-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
++```bash
++npm install
++```
+ 
+-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
++Run the development server:
+ 
+-## Deploy on Vercel
++```bash
++npm run dev
++```
++
++Open [http://localhost:3000](http://localhost:3000) to play the trainer.
++
++## Quality checks
++
++```bash
++npm test -- --runInBand
++npm run lint
++npm run build
++```
+ 
+-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
++## Notes for maintainers
+ 
+-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+-# face-up-pai-gow
++The app intentionally avoids remote font fetching so production builds are not blocked in restricted network environments. Package update attempts may still be limited by registry access policies in locked-down environments.
+diff --git a/app/blog/beginner-pai-gow/page.js b/app/blog/beginner-pai-gow/page.js
+index 8e32a89..a8b8056 100644
+--- a/app/blog/beginner-pai-gow/page.js
++++ b/app/blog/beginner-pai-gow/page.js
+@@ -1,22 +1,16 @@
+-"use client";
+-
+-import Head from "next/head";
+ import Link from "next/link";
+ 
++export const metadata = {
++  title: "Beginner's Guide to Pai Gow Poker | Free Online Trainer",
++  description: 'Learn Pai Gow Poker with our free online trainer. Discover the rules, find tips, and start playing Face-Up Pai Gow for free.',
++};
++
+ export default function BeginnerPaiGow() {
+   return (
+     <>
+-      <Head>
+-        <title>Beginner's Guide to Pai Gow Poker | Free Online Trainer</title>
+-        <meta
+-          name="description"
+-          content="Learn Pai Gow Poker with our free online trainer. Discover the rules, find tips, and start playing Face-Up Pai Gow for free."
+-        />
+-      </Head>
+-
+       <main className="max-w-4xl mx-auto p-4">
+         <h1 className="text-3xl font-bold mb-4">
+-          Beginner's Guide to Pai Gow Poker
++          Beginner&rsquo;s Guide to Pai Gow Poker
+         </h1>
+ 
+         <p className="mb-4">
+@@ -43,7 +37,7 @@ export default function BeginnerPaiGow() {
+         </h2>
+         <ul className="list-disc list-inside mb-4">
+           <li>Completely free – no deposit or sign-up required.</li>
+-          <li>Face-Up Pai Gow mode to help you see the dealer’s strategy.</li>
++          <li>Face-Up Pai Gow mode to help you see the dealer&rsquo;s strategy.</li>
+           <li>Practice side bets like the Fortune bonus without real-money risk.</li>
+           <li>User-friendly interface to learn at your own speed.</li>
+         </ul>
+diff --git a/app/blog/face-up-pai-gow/page.js b/app/blog/face-up-pai-gow/page.js
+index dd00d14..5808819 100644
+--- a/app/blog/face-up-pai-gow/page.js
++++ b/app/blog/face-up-pai-gow/page.js
+@@ -1,19 +1,13 @@
+-"use client";
+-
+-import Head from "next/head";
+ import Link from "next/link";
+ 
++export const metadata = {
++  title: 'Face-Up Pai Gow Poker | Free Practice & Online Trainer',
++  description: 'Discover Face-Up Pai Gow Poker. Learn how to play, see the dealer’s cards, and practice for free with our online trainer.',
++};
++
+ export default function FaceUpPaiGow() {
+   return (
+     <>
+-      <Head>
+-        <title>Face-Up Pai Gow Poker | Free Practice & Online Trainer</title>
+-        <meta
+-          name="description"
+-          content="Discover Face-Up Pai Gow Poker. Learn how to play, see the dealer’s cards, and practice for free with our online trainer."
+-        />
+-      </Head>
+-
+       <main className="max-w-4xl mx-auto p-4">
+         <h1 className="text-3xl font-bold mb-4">
+           Face-Up Pai Gow Poker: Everything You Need to Know
+@@ -21,9 +15,9 @@ export default function FaceUpPaiGow() {
+ 
+         <p className="mb-4">
+           <strong>Face-Up Pai Gow</strong> is a unique variation of Pai Gow
+-          Poker where the dealer’s cards are fully visible. This adds a new
++          Poker where the dealer&rsquo;s cards are fully visible. This adds a new
+           dimension to the game, letting you set your hands with full knowledge
+-          of what you’re up against. On this page, we’ll break down how Face-Up
++          of what you&rsquo;re up against. On this page, we&rsquo;ll break down how Face-Up
+           differs from standard Pai Gow and how you can <strong>practice</strong> using our free online trainer.
+         </p>
+ 
+@@ -32,8 +26,8 @@ export default function FaceUpPaiGow() {
+         </h2>
+         <p className="mb-4">
+           In <strong>standard Pai Gow</strong>, both your seven cards and the
+-          dealer’s seven cards are hidden. In <em>Face-Up Pai Gow</em>, the
+-          dealer’s 7-card set is dealt face up. This means you can see exactly
++          dealer&rsquo;s seven cards are hidden. In <em>Face-Up Pai Gow</em>, the
++          dealer&rsquo;s 7-card set is dealt face up. This means you can see exactly
+           how the dealer arranges their high and low hands (often following the
+           “house way”). This extra info can guide how you set your own two-card
+           and five-card hands, creating a more strategic experience.
+@@ -44,7 +38,7 @@ export default function FaceUpPaiGow() {
+         </h2>
+         <ul className="list-disc list-inside mb-4">
+           <li>
+-            <strong>Better Informed Decisions:</strong> Knowing the dealer’s
++            <strong>Better Informed Decisions:</strong> Knowing the dealer&rsquo;s
+             hand allows more strategic moves for your own split.
+           </li>
+           <li>
+@@ -59,17 +53,17 @@ export default function FaceUpPaiGow() {
+ 
+         <h2 className="text-xl font-semibold mt-6 mb-2">Using Our Trainer</h2>
+         <p className="mb-4">
+-          We’ve designed a <strong><Link href="/" className="text-blue-600 hover:underline">free Face-Up Pai Gow Poker</Link></strong> trainer
++          We&rsquo;ve designed a <strong><Link href="/" className="text-blue-600 hover:underline">free Face-Up Pai Gow Poker</Link></strong> trainer
+           so you can familiarize yourself with the open-hand advantage. Simply:
+         </p>
+         <ol className="list-decimal list-inside mb-4">
+           <li>Deal the cards.</li>
+           <li>
+-            Observe the <strong>dealer’s 7 cards</strong> and how they form their
++            Observe the <strong>dealer&rsquo;s 7 cards</strong> and how they form their
+             high and low hands.
+           </li>
+           <li>Arrange your 7 cards accordingly.</li>
+-          <li>Click “Compare” to see if your split beats the dealer’s.</li>
++          <li>Click “Compare” to see if your split beats the dealer&rsquo;s.</li>
+         </ol>
+ 
+         <p className="mb-4">
+@@ -83,7 +77,7 @@ export default function FaceUpPaiGow() {
+         </h2>
+         <ul className="list-disc list-inside mb-4">
+           <li>
+-            Always consider how the house way sets the dealer’s 5-card hand—try
++            Always consider how the house way sets the dealer&rsquo;s 5-card hand—try
+             to spot weaknesses you can exploit.
+           </li>
+           <li>Pay attention to side bets, like the Fortune bonus, for extra payouts.</li>
+diff --git a/app/blog/joker-card/page.js b/app/blog/joker-card/page.js
+index 529a76b..818b827 100644
+--- a/app/blog/joker-card/page.js
++++ b/app/blog/joker-card/page.js
+@@ -1,19 +1,13 @@
+-"use client";
+-
+-import Head from "next/head";
+ import Link from "next/link";
+ 
++export const metadata = {
++  title: 'The Joker Card in Pai Gow Poker | Tips & Tricks',
++  description: "Learn how the Joker card works in Pai Gow Poker. It's semi-wild, helping form straights, flushes, or acting as an Ace.",
++};
++
+ export default function JokerCardPost() {
+   return (
+     <>
+-      <Head>
+-        <title>The Joker Card in Pai Gow Poker | Tips & Tricks</title>
+-        <meta
+-          name="description"
+-          content="Learn how the Joker card works in Pai Gow Poker. It's semi-wild, helping form straights, flushes, or acting as an Ace."
+-        />
+-      </Head>
+-
+       <main className="max-w-4xl mx-auto p-4">
+         <h1 className="text-3xl font-bold mb-4">
+           The Joker Card in Pai Gow Poker: How It Works & Why It Matters
+@@ -24,7 +18,7 @@ export default function JokerCardPost() {
+           twist. Unlike other wild cards that can substitute for any rank or
+           suit, the Pai Gow Joker is considered <strong>semi-wild</strong>. It
+           primarily acts as an Ace—unless it can complete a flush or a straight
+-          in your five-card hand. In this post, we’ll break down exactly how the
++          in your five-card hand. In this post, we&rsquo;ll break down exactly how the
+           Joker card functions and how you can use it to gain an edge in both
+           standard and <strong>Face-Up Pai Gow</strong>.
+         </p>
+@@ -34,7 +28,7 @@ export default function JokerCardPost() {
+         </h2>
+         <p className="mb-4">
+           In many poker variants, a wild card can become any rank or suit. In <strong>Pai Gow Poker</strong>, the Joker is more limited. By default,
+-          it’s treated as an Ace. However, if you’re just one card away from
++          it&rsquo;s treated as an Ace. However, if you&rsquo;re just one card away from
+           completing a flush or a straight, the Joker can fill that slot,
+           effectively turning into the rank and suit you need for that 5-card
+           combination.
+@@ -51,7 +45,7 @@ export default function JokerCardPost() {
+           <li>
+             <strong>Straight Filling:</strong> Missing one rank in a 5-card
+             straight? The Joker becomes that missing rank. For instance, if
+-            you’re holding 9, 10, J, Q, Joker, you effectively have a straight.
++            you&rsquo;re holding 9, 10, J, Q, Joker, you effectively have a straight.
+           </li>
+           <li>
+             <strong>Ace High Card:</strong> If the Joker can’t help form
+@@ -69,7 +63,7 @@ export default function JokerCardPost() {
+           example, if your 7-card distribution has a single 7 plus the Joker, 
+           you can form a <strong>Pair of 7s</strong> in your low hand, leaving
+           a potentially stronger 5-card hand for the high. This is especially
+-          useful in <strong>Face-Up Pai Gow</strong> once you see the dealer’s
++          useful in <strong>Face-Up Pai Gow</strong> once you see the dealer&rsquo;s
+           arrangement.
+         </p>
+ 
+@@ -81,7 +75,7 @@ export default function JokerCardPost() {
+           Our free <strong><Link href="/" className="text-blue-600 hover:underline">Pai Gow Poker trainer</Link></strong> replicates real-game
+           scenarios, allowing you to experiment with Joker placements. Whether
+           you want to complete a big hand in your 5-card or form a vital pair in
+-          your 2-card, you can see how your decision compares to the dealer’s
++          your 2-card, you can see how your decision compares to the dealer&rsquo;s
+           final layout—especially in <strong>Face-Up Pai Gow</strong> where you
+           see the house way in action.
+         </p>
+@@ -97,7 +91,7 @@ export default function JokerCardPost() {
+           </li>
+           <li>
+             If forming a major combo is impossible, see if placing the Joker in
+-            your 2-card hand to form a pair helps you beat the dealer’s low
++            your 2-card hand to form a pair helps you beat the dealer&rsquo;s low
+             hand.
+           </li>
+           <li>
+diff --git a/app/blog/page.js b/app/blog/page.js
+index 02c5bfd..7d29241 100644
+--- a/app/blog/page.js
++++ b/app/blog/page.js
+@@ -1,21 +1,11 @@
+-"use client";
+-
+-import Head from "next/head";
+-import Link from "next/link";
+ import BlogIndex from "../utils/BlogIndex";
+ 
+-export default function BlogPosts() {
+-  return (
+-    <>
+-      <Head>
+-        <title>Blog Posts | PaiGowLab.com</title>
+-        <meta
+-          name="description"
+-          content="Learn Pai Gow Poker with our free online trainer. Discover the rules, find tips, and start playing Face-Up Pai Gow for free."
+-        />
+-      </Head>
++export const metadata = {
++  title: "Blog Posts | PaiGowLab.com",
++  description:
++    "Learn Pai Gow Poker with our free online trainer. Discover the rules, find tips, and start playing Face-Up Pai Gow for free.",
++};
+ 
+-      <BlogIndex />
+-    </>
+-  );
+-}
+\ No newline at end of file
++export default function BlogPosts() {
++  return <BlogIndex />;
++}
+diff --git a/app/blog/pai-gow-strategies/page.js b/app/blog/pai-gow-strategies/page.js
+index 5eec0fe..5c3c479 100644
+--- a/app/blog/pai-gow-strategies/page.js
++++ b/app/blog/pai-gow-strategies/page.js
+@@ -1,19 +1,13 @@
+-"use client";
+-
+-import Head from "next/head";
+ import Link from "next/link";
+ 
++export const metadata = {
++  title: '5 Strategies to Improve Your Pai Gow Poker Skills | Free Trainer',
++  description: 'Five key Pai Gow Poker strategies to help you win, from two-card hand splitting to Joker usage. Practice for free in our Face-Up Pai Gow trainer.',
++};
++
+ export default function PaiGowStrategies() {
+   return (
+     <>
+-      <Head>
+-        <title>5 Strategies to Improve Your Pai Gow Poker Skills | Free Trainer</title>
+-        <meta
+-          name="description"
+-          content="Five key Pai Gow Poker strategies to help you win, from two-card hand splitting to Joker usage. Practice for free in our Face-Up Pai Gow trainer."
+-        />
+-      </Head>
+-
+       <main className="max-w-4xl mx-auto p-4">
+         <h1 className="text-3xl font-bold mb-4">
+           5 Strategies to Improve Your Pai Gow Poker Skills
+@@ -21,8 +15,8 @@ export default function PaiGowStrategies() {
+ 
+         <p className="mb-4">
+           Want to boost your <strong>Pai Gow Poker</strong> game and beat the
+-          dealer more consistently? We’ve got five key tips that will help you
+-          strategize—whether you’re playing standard or
++          dealer more consistently? We&rsquo;ve got five key tips that will help you
++          strategize—whether you&rsquo;re playing standard or
+           <strong> Face-Up Pai Gow</strong>. Best of all, you can test these
+           tips in our <strong>free online trainer</strong> before hitting a
+           live table.
+@@ -34,7 +28,7 @@ export default function PaiGowStrategies() {
+         <p className="mb-4">
+           The biggest mistake beginners make is ignoring the impact of the
+           two-card low hand. A strong low hand can secure half the battle if it
+-          beats the dealer’s low. Use our trainer to see how different splits
++          beats the dealer&rsquo;s low. Use our trainer to see how different splits
+           affect your 5-card high hand and 2-card low hand together.
+         </p>
+ 
+@@ -52,7 +46,7 @@ export default function PaiGowStrategies() {
+           3. Explore the House Way
+         </h2>
+         <p className="mb-4">
+-          Most casinos use a “house way” to set the dealer’s hands. In
++          Most casinos use a “house way” to set the dealer&rsquo;s hands. In
+           <strong> Face-Up Pai Gow</strong>, you can see this logic in action.
+           By knowing how the house arranges pairs, straights, and flushes, you
+           can predict their final layout and adjust yours for maximum edge.
+diff --git a/app/layout.js b/app/layout.js
+index 20f3d9b..a04b7a5 100644
+--- a/app/layout.js
++++ b/app/layout.js
+@@ -1,19 +1,8 @@
+-import { Geist, Geist_Mono } from "next/font/google";
+ import "./globals.css";
+ import Header from "./utils/Header";
+ import Script from "next/script";
+ import Providers from "./providers";
+ 
+-const geistSans = Geist({
+-  variable: "--font-geist-sans",
+-  subsets: ["latin"],
+-});
+-
+-const geistMono = Geist_Mono({
+-  variable: "--font-geist-mono",
+-  subsets: ["latin"],
+-});
+-
+ export const metadata = {
+   title: "Face-Up Pai Gow Poker | PaiGowLab",
+   description: "Learn to play Face-Up Pai Gow Poker for free at PaiGowLab.com!",
+@@ -26,7 +15,7 @@ export default function RootLayout({ children }) {
+         <meta name="google-adsense-account" content="ca-pub-5619143235904865"></meta>
+       </head>
+       <body
+-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-100 dark:bg-gray-800`}
++        className="antialiased bg-gray-100 dark:bg-gray-800"
+       >
+         <Script async src="https://www.googletagmanager.com/gtag/js?id=G-STCSWY7WCG" />
+         <Script id="googleanalytics-init">
+diff --git a/app/page.js b/app/page.js
+index 9352549..1886c02 100644
+--- a/app/page.js
++++ b/app/page.js
+@@ -1,6 +1,6 @@
+ "use client";
+ 
+-import { useState, useCallback } from "react";
++import { useState } from "react";
+ import { dealHands, compareHands } from "./utils/gameLogic";
+ import { evaluate2CardHand } from "./utils/twoCardEvaluator";
+ import { evaluate5CardHand } from "./utils/pokerEvaluator";
+@@ -134,17 +134,12 @@ export default function Home() {
+       mainResult = "PUSH";
+     }
+ 
+-    let player7Cards = originalPlayerHand
+-
+-    console.log("Compare: old bankroll=", bankroll, "bets=", bets);
+     const { newRoll, breakdown } = settleAllBets({
+       bankroll,
+       bets,
+       mainResult,
+       player7Cards: originalPlayerHand
+     });
+-    console.log("Compare: newRoll=", newRoll);
+-
+     setBankroll(newRoll);
+ 
+     // Once the round ends, remember these bets as "last round bets"
+@@ -165,32 +160,24 @@ export default function Home() {
+ 
+   // --- DRAG & DROP HANDLERS ---
+ 
+-  const handleDropToLow = useCallback((item) => {
+-    console.log("IN handleDropToLow => item:", item);
+-    console.log("playerPool:", playerPool);
+-    console.log("playerPool length:", playerPool.length);
+-console.log("index:", item.index);
+-    // item = { index, source }
+-    if (item.source === "pool") {
+-      // move card from playerPool -> playerLow
+-      if (playerLow.length >= 2) return;
+-      const card = playerPool[item.index];
+-      console.log("card: ", card)
+-      if (!card) return;
+-      setPlayerPool((prev) => prev.filter((_, i) => i !== item.index));
+-      setPlayerLow((prev) => [...prev, card]);
+-      console.log("player low hand is:", playerLow)
+-    }
+-  }, [playerLow, playerPool]);
+-  
+-  function handleDropToPool(item) {
+-    if (item.source === "low") {
+-      // move card from playerLow -> playerPool
+-      const card = playerLow[item.index];
+-      if (!card) return;
+-      setPlayerLow((prev) => prev.filter((_, i) => i !== item.index));
+-      setPlayerPool((prev) => [...prev, card]);
+-    }
++  function moveCardToLow(item) {
++    if (item.source !== "pool" || playerLow.length >= 2) return;
++
++    const selectedCard = playerPool[item.index];
++    if (!selectedCard) return;
++
++    setPlayerPool((prevPool) => prevPool.filter((_, i) => i !== item.index));
++    setPlayerLow((prevLow) => [...prevLow, selectedCard]);
++  }
++
++  function moveCardToPool(item) {
++    if (item.source !== "low") return;
++
++    const selectedCard = playerLow[item.index];
++    if (!selectedCard) return;
++
++    setPlayerLow((prevLow) => prevLow.filter((_, i) => i !== item.index));
++    setPlayerPool((prevPool) => [...prevPool, selectedCard]);
+   }
+ 
+   return (
+@@ -267,17 +254,8 @@ console.log("index:", item.index);
+ 
+         <DropZone
+           className="flex flex-wrap gap-2 p-4 border border-dashed border-gray-500 bg-gray-100 min-h-[120px]"
+-          onDropCard={(item) => {
+-            let selectedCard;
+-            setPlayerPool((prevPool) => {
+-              selectedCard = prevPool[item.index];
+-              if (!selectedCard) return prevPool;
+-              return prevPool.filter((_, i) => i !== item.index);
+-            });
+-            if (selectedCard) {
+-              setPlayerLow((prevLow) => [...prevLow, selectedCard]);
+-            }
+-          }}
++          onDropCard={moveCardToLow}
++          canDropItem={(item) => item.source === "pool" && playerLow.length < 2}
+         >
+           {playerLow.map((card, i) => (
+             <DraggableCard key={i} card={card} index={i} source="low" />
+@@ -294,17 +272,8 @@ console.log("index:", item.index);
+         </p>
+         <DropZone
+           className="flex flex-wrap gap-2"
+-          onDropCard={(item) => {
+-            let selectedCard;
+-            setPlayerLow((prevLow) => {
+-              selectedCard = prevLow[item.index];
+-              if (!selectedCard) return prevLow;
+-              return prevLow.filter((_, i) => i !== item.index);
+-            });
+-            if (selectedCard) {
+-              setPlayerPool((prevPool) => [...prevPool, selectedCard]);
+-            }
+-          }}
++          onDropCard={moveCardToPool}
++          canDropItem={(item) => item.source === "low"}
+         >
+           {playerPool.map((card, index) => (
+             <DraggableCard key={index} card={card} index={index} source="pool" />
+diff --git a/app/utils/BetCircle.js b/app/utils/BetCircle.js
+index a2f0169..da379b6 100644
+--- a/app/utils/BetCircle.js
++++ b/app/utils/BetCircle.js
+@@ -7,7 +7,7 @@ export default function BetCircle({ betType, betAmount, onDropChip }) {
+   // onDropChip is a callback that receives (betType, chipValue)
+   const [{ isOver }, dropRef] = useDrop(() => ({
+     accept: ITEM_TYPES.CHIP,
+-    drop: (item, monitor) => {
++    drop: (item) => {
+       // item = { chipValue: number }
+       if (onDropChip) {
+         onDropChip(betType, item.chipValue);
+diff --git a/app/utils/BlogIndex.js b/app/utils/BlogIndex.js
+index e3a99d9..bd94d2e 100644
+--- a/app/utils/BlogIndex.js
++++ b/app/utils/BlogIndex.js
+@@ -9,7 +9,7 @@ export default function BlogIndex() {
+       <ul className="list-disc list-inside space-y-2">
+         <li>
+           <Link href="/blog/beginner-pai-gow" className="text-blue-600 hover:underline">
+-            Beginner's Guide to Pai Gow Poker
++            Beginner&rsquo;s Guide to Pai Gow Poker
+           </Link>
+         </li>
+         <li>
+diff --git a/app/utils/Card.js b/app/utils/Card.js
+index 5bb61ef..a3cc177 100644
+--- a/app/utils/Card.js
++++ b/app/utils/Card.js
+@@ -1,59 +1,47 @@
+ "use client";
++
+ import Image from "next/image";
++import clsx from "clsx";
+ 
+-import clsx from "clsx"; // Optional if you want to conditionally join classes easily
+-// If you don't want to install `clsx`, you can manually concatenate strings.
++export default function Card({ card, faceUp = true }) {
++  const baseClassName =
++    "w-20 h-28 rounded shadow cursor-pointer select-none flex items-center justify-center";
+ 
+-export default function Card({ card, faceUp = true, selected = false }) {
+-  // Face-down scenario (you may not need it if your game is always face-up)
+   if (!faceUp) {
+     return (
+-      (<div
+-        className="w-20 h-28 bg-blue-900 text-white flex items-center justify-center 
+-                   rounded shadow cursor-pointer select-none"
+-      >
++      <div className={`${baseClassName} bg-blue-900 text-white`}>
+         <Image
+-          src={'/cards/back.png'}
++          src="/cards/back.png"
+           alt="Card Back"
+           width={80}
+           height={120}
+-          style={{
+-            maxWidth: "100%",
+-            height: "auto"
+-          }} />
+-      </div>)
++          style={{ maxWidth: "100%", height: "auto" }}
++        />
++      </div>
+     );
+   }
+ 
+   if (card.rank === "Joker") {
+     return (
+-      (<div
+-        className="w-20 h-28 bg-blue-900 text-white flex items-center justify-center 
+-                   rounded shadow cursor-pointer select-none"
+-      >
++      <div className={`${baseClassName} bg-blue-900 text-white`}>
+         <Image
+-          src={'/cards/joker.png'}
++          src="/cards/joker.png"
+           alt="Joker"
+           width={80}
+           height={120}
+-          style={{
+-            maxWidth: "100%",
+-            height: "auto"
+-          }} />
+-      </div>)
++          style={{ maxWidth: "100%", height: "auto" }}
++        />
++      </div>
+     );
+   }
+ 
+-  
+-  const borderClass = "border-4 border-green-400";
+-    
+-  const filename = `${card.rank}${card.suit}.png`; 
++  const filename = `${card.rank}${card.suit}.png`;
+ 
+   return (
+-    (<div
++    <div
+       className={clsx(
+-        "w-20 h-28 bg-white rounded shadow flex flex-col items-center justify-center cursor-pointer select-none hover:shadow-md transition",
+-        borderClass
++        baseClassName,
++        "bg-white hover:shadow-md transition border-4 border-green-400",
+       )}
+     >
+       <Image
+@@ -61,11 +49,9 @@ export default function Card({ card, faceUp = true, selected = false }) {
+         alt={`${card.rank} of ${card.suit}`}
+         width={80}
+         height={120}
+-        sizes="100vw"
+-        style={{
+-          width: "100%",
+-          height: "auto"
+-        }} />
+-    </div>)
++        sizes="80px"
++        style={{ width: "100%", height: "auto" }}
++      />
++    </div>
+   );
+-}
+\ No newline at end of file
++}
+diff --git a/app/utils/DropZone.js b/app/utils/DropZone.js
+index e18ed24..d1228c6 100644
+--- a/app/utils/DropZone.js
++++ b/app/utils/DropZone.js
+@@ -13,15 +13,13 @@ export default function DropZone({
+   // canDropItem is optional if you want to filter
+   const [{ isOver }, dropRef] = useDrop(() => ({
+     accept: ITEM_TYPES.CARD,
+-    drop: (item, monitor) => {
++    drop: (item) => {
+       // item = { index, source } from DraggableCard
+-      console.log("DropZone drop fired with:", item);
+       if (onDropCard) {
+-        console.log("Calling onDropCard now...");
+         onDropCard(item);
+       }
+     },
+-    canDrop: (item, monitor) => {
++    canDrop: (item) => {
+       if (canDropItem) {
+         return canDropItem(item);
+       }
+diff --git a/app/utils/Header.js b/app/utils/Header.js
+index a680969..1219c75 100644
+--- a/app/utils/Header.js
++++ b/app/utils/Header.js
+@@ -20,7 +20,7 @@ export default function Header() {
+             Blog
+           </Link>
+           <Link href="/blog/beginner-pai-gow" className="hover:text-yellow-300">
+-            Beginner's Guide
++            Beginner&rsquo;s Guide
+           </Link>
+           {/* Add more if needed */}
+         </nav>
+diff --git a/app/utils/PolyfillProvider.js b/app/utils/PolyfillProvider.js
+deleted file mode 100644
+index 2ae7115..0000000
+--- a/app/utils/PolyfillProvider.js
++++ /dev/null
+@@ -1,25 +0,0 @@
+-"use client";
+-
+-// We must do this client-side so it runs on the browser, not server.
+-import { useEffect } from "react";
+-import { polyfill } from "mobile-drag-drop";
+-import { scrollBehaviourDragImageTranslateOverride } from 'mobile-drag-drop/scroll-behaviour';
+-
+-// This CSS includes some default styles for the polyfill
+-import "mobile-drag-drop/default.css";
+-
+-export default function PolyfillProvider({ children }) {
+-  useEffect(() => {
+-    // Initialize the polyfill once on mount
+-    polyfill({
+-      dragImageTranslateOverride: scrollBehaviourDragImageTranslateOverride
+-    });
+-
+-    // If you want to disable scrolling while drag (to emulate desktop)
+-    // you can also do:
+-    // import { scrollBehaviourDragImageTranslateOverride } from 'mobile-drag-drop/scroll-behaviour';
+-    // polyfill({ dragImageTranslateOverride: scrollBehaviourDragImageTranslateOverride });
+-  }, []);
+-
+-  return <>{children}</>;
+-}
+diff --git a/app/utils/WagerPanel.js b/app/utils/WagerPanel.js
+index 3a62c76..7ea92a8 100644
+--- a/app/utils/WagerPanel.js
++++ b/app/utils/WagerPanel.js
+@@ -1,7 +1,6 @@
+ "use client"; 
+ // If you're on Next.js App Router, ensure client-side rendering for drag/drop
+ 
+-import { useCallback } from "react"; // or useState if storing child-specific states
+ import DraggableChip from "./DraggableChip";
+ import BetCircle from "./BetCircle";
+ 
+@@ -13,31 +12,39 @@ export default function WagerPanel({
+   lastRoundBets,
+   payoutBreakdown,
+ }) {
++  const activeBetTotal = Object.values(bets).reduce((sum, amount) => sum + amount, 0);
++
+   // For drag-and-drop
+   function handleDropChip(betType, chipValue) {
+-    console.log("Dropping chipValue:", chipValue, "on betType:", betType);
+-
+-    // Check bankroll
+-    if (bankroll - chipValue < 0) {
++    if (activeBetTotal + chipValue > bankroll) {
+       alert("Not enough bankroll!");
+       return;
+     }
+ 
+-    // We only remove the bet from bankroll at final settlement (Approach A),
+-    // unless you prefer subtracting up-front. For the "Approach A" way:
+-    // Just add to bets
++    // Bets remain visible in the betting circles and are settled at round end.
+     setBets((prev) => ({
+       ...prev,
+       [betType]: prev[betType] + chipValue,
+     }));
+   }
+ 
+-   // The "Repeat Bet" button logic:
+-   function handleRepeatBet() {
++  // The "Repeat Bet" button logic:
++  function handleRepeatBet() {
+     if (!lastRoundBets) {
+       alert("No previous bets to repeat!");
+       return;
+     }
++
++    const repeatTotal = Object.values(lastRoundBets).reduce(
++      (sum, amount) => sum + amount,
++      0,
++    );
++
++    if (repeatTotal > bankroll) {
++      alert("Not enough bankroll to repeat the last bet!");
++      return;
++    }
++
+     setBets({ ...lastRoundBets });
+   }
+ 
+@@ -50,6 +57,7 @@ export default function WagerPanel({
+ 
+       {/* Display Bankroll */}
+       <p className="mb-2">Bankroll: ${bankroll}</p>
++      <p className="mb-2 text-sm">Committed this round: ${activeBetTotal}</p>
+       {/* The "Repeat Bet" button */}
+       <div className="mt-4 mb-4">
+         <button
+diff --git a/app/utils/dndPipeline.js b/app/utils/dndPipeline.js
+index 831ccc4..21d3e5e 100644
+--- a/app/utils/dndPipeline.js
++++ b/app/utils/dndPipeline.js
+@@ -12,10 +12,12 @@ import {
+ export const HTML5toTouch = {
+   backends: [
+     {
++      id: "html5",
+       backend: HTML5Backend,
+       transition: HTML5DragTransition,
+     },
+     {
++      id: "touch",
+       backend: TouchBackend,
+       options: { enableMouseEvents: true },
+       transition: TouchTransition,
+diff --git a/app/utils/payouts.js b/app/utils/payouts.js
+index 4f99ca5..9db0d63 100644
+--- a/app/utils/payouts.js
++++ b/app/utils/payouts.js
+@@ -74,26 +74,31 @@ export function settleAllBets({ bankroll, bets, mainResult, player7Cards }) {
+   // if PUSH => mainNet=0, do nothing
+ 
+   // Fortune logic:
+-  let fortuneOutcome = "LOSE";
+-  let fortuneNet = -bets.fortune; // default lose
+-  let fortuneNote = "";
+-  
+-  // Evaluate the player's best 5-of-7, see if they qualify for bonus
+-  // e.g. if 3-of-a-kind => pay 4×
+-  const bestEval = evaluateBest5of7(player7Cards);
+-  const categoryName = getCategoryName(bestEval.category);
+-  const multiplier = fortunePaytable[categoryName] || 0;
+-  if (multiplier > 0) {
+-    fortuneOutcome = "WIN";
+-    // net gain = (multiplier - 1)*bets.fortune if you remove the bet at the end 
+-    // or multiplier*bets.fortune if you remove up front. 
+-    // Here I'll assume approach A (only remove at final).
+-    fortuneNet = bets.fortune * (multiplier - 1);
++  let fortuneOutcome = "PUSH";
++  let fortuneNet = 0;
++  let fortuneNote = "No Fortune bet placed";
++
++  if (bets.fortune > 0) {
++    fortuneOutcome = "LOSE";
++    fortuneNet = -bets.fortune;
++
++    // Evaluate the player's best 5-of-7, see if they qualify for bonus
++    // e.g. if 3-of-a-kind => pay 4×
++    const bestEval = evaluateBest5of7(player7Cards);
++    const categoryName = getCategoryName(bestEval.category);
++    const multiplier = fortunePaytable[categoryName] || 0;
++    if (multiplier > 0) {
++      fortuneOutcome = "WIN";
++      // net gain = (multiplier - 1)*bets.fortune if you remove the bet at the end
++      // or multiplier*bets.fortune if you remove up front.
++      // Here I'll assume approach A (only remove at final).
++      fortuneNet = bets.fortune * (multiplier - 1);
++      fortuneNote = `Hand: ${categoryName} pays ${multiplier}× on Fortune`;
++    } else {
++      fortuneNote = `Hand: ${categoryName} => no bonus`;
++    }
++
+     newRoll += fortuneNet;
+-    fortuneNote = `Hand: ${categoryName} pays ${multiplier}× on Fortune`;
+-  } else {
+-    fortuneNote = `Hand: ${categoryName} => no bonus`;
+-    newRoll += fortuneNet; // negative
+   }
+ 
+   // Return final plus a "breakdown" object
+diff --git a/app/utils/payouts.test.js b/app/utils/payouts.test.js
+index a257b80..dc9b148 100644
+--- a/app/utils/payouts.test.js
++++ b/app/utils/payouts.test.js
+@@ -1,133 +1,92 @@
+-/**
+- * payouts.test.js
+- *
+- * Testing settleMainBet, settleFortuneBet, and settleAllBets.
+- */
++import { settleAllBets, settleFortuneBet, settleMainBet } from "./payouts";
+ 
+-import { settleAllBets } from './payouts';
+-
+-// If you have separate named exports:
+-import { settleMainBet, settleFortuneBet } from './payouts';
+-
+-// If your code needs "evaluateBest5of7", "getCategoryName" from 'pokerEvaluator.js',
+-// you can import them or mock them if you want an isolated test.
++const card = (rank, suit) => ({
++  rank,
++  suit,
++  value: rank === "A" ? 14 : rank === "K" ? 13 : rank === "Q" ? 12 : rank === "J" ? 11 : Number(rank),
++});
+ 
+ describe("Main bet settlement", () => {
+-  it("should pay 1:1 on a player win (no commission)", () => {
+-    const initialBankroll = 1000;
+-    const mainBet = 100;
+-    const mainResult = "PLAYER WINS";
+-
+-    // We'll do a direct call to settleMainBet if you have it exported
+-    const finalBankroll = settleMainBet(initialBankroll, mainBet, mainResult);
+-
+-    expect(finalBankroll).toBe(1100); // 1000 + 100
++  it("pays 1:1 on a player win", () => {
++    expect(settleMainBet(1000, 100, "PLAYER WINS")).toBe(1100);
+   });
+ 
+-  it("should subtract main bet on a dealer win", () => {
+-    const initialBankroll = 1000;
+-    const mainBet = 50;
+-    const mainResult = "DEALER WINS";
+-
+-    const finalBankroll = settleMainBet(initialBankroll, mainBet, mainResult);
+-
+-    expect(finalBankroll).toBe(950); // 1000 - 50
++  it("subtracts the main bet on a dealer win", () => {
++    expect(settleMainBet(1000, 50, "DEALER WINS")).toBe(950);
+   });
+ 
+-  it("should leave bankroll unchanged on a push", () => {
+-    const initialBankroll = 1000;
+-    const mainBet = 200;
+-    const mainResult = "PUSH";
+-
+-    const finalBankroll = settleMainBet(initialBankroll, mainBet, mainResult);
+-
+-    expect(finalBankroll).toBe(1000); // no change
++  it("leaves bankroll unchanged on a push", () => {
++    expect(settleMainBet(1000, 200, "PUSH")).toBe(1000);
+   });
+ });
+ 
+ describe("Fortune bet settlement", () => {
+-  // Suppose we want to test "3-of-a-kind" pay => 4:1 total. 
+-  // We'll either:
+-  // 1) Provide real 7 cards that form at least 3-of-a-kind in the best 5.
+-  // 2) Or mock the evaluateBest5of7 function to force a certain category.
+-
+-  it("should pay 3-of-a-kind multiplier if best5 is 3-of-a-kind", () => {
+-    // approach: mock the evaluateBest5of7 if your code is set up to import it.
+-    // But let's assume we pass real cards for a 7 card that has 3-of-a-kind guaranteed.
+-
+-    // For a simpler approach, let's assume we have a mock function or we do a manual override.
+-    // For demonstration, let's do a quick jest.mock approach:
+-    // (If you prefer real card data, see next test.)
+-
+-    // We'll do a manual mock:
+-   // jest.mock('./pokerEvaluator', () => ({
+-      // Force evaluateBest5of7 => { category: 4 } => "threeOfAKind"
+-      //evaluateBest5of7: jest.fn(() => ({ category: 4, tiebreaks: [] })),
+-      //getCategoryName: jest.fn(() => "threeOfAKind"),
+-    //}));
+-
+-    // Re-require payouts after mocking
+-    //const { settleFortuneBet } = require('./payouts');
+-
+-    const initialBankroll = 1000;
+-    const fortuneBet = 10;
+-    const player7Cards = [{ rank: "10", value: 10, suit: "C" },
+-      { rank: "10", value: 10, suit: "D" },
+-      { rank: "10", value: 10, suit: "H" },
+-      { rank: "2", value: 2, suit: "C" },
+-      { rank: "5", value: 5, suit: "D" },
+-      { rank: "7", value: 7, suit: "H" },
+-      { rank: "K", value: 13, suit: "S" },]; // doesn't matter, because we're mocking
+-
+-    const finalBankroll = settleFortuneBet(initialBankroll, fortuneBet, player7Cards);
+-
+-    // 3-of-a-kind = 4 => total 4 x original => net +3
+-    expect(finalBankroll).toBe(1000 + (10 * 3)); // 1000 + 30 => 1030
+-
+-    jest.resetModules(); 
++  it("pays the three-of-a-kind multiplier", () => {
++    const player7Cards = [
++      card("10", "C"),
++      card("10", "D"),
++      card("10", "H"),
++      card("2", "C"),
++      card("5", "D"),
++      card("7", "H"),
++      card("K", "S"),
++    ];
++
++    expect(settleFortuneBet(1000, 10, player7Cards)).toBe(1030);
+   });
+ 
+-  it("should lose fortune bet if best is only high card", () => {
+-    // Another mock scenario or real 7-cards. We'll do a real mock again:
+-    jest.mock('./pokerEvaluator', () => ({
+-      evaluateBest5of7: jest.fn(() => ({ category: 1, tiebreaks: [] })),
+-      getCategoryName: jest.fn(() => "highCard"),
+-    }));
+-    const { settleFortuneBet } = require('./payouts');
+-
+-    const initialBankroll = 1000;
+-    const fortuneBet = 50;
+-    const player7Cards = []; // doesn't matter, because mocked
+-
+-    const finalBankroll = settleFortuneBet(initialBankroll, fortuneBet, player7Cards);
+-    // no 3-of-a-kind or better => lose bet
+-    expect(finalBankroll).toBe(950);
++  it("loses the fortune bet when the best hand is only high card", () => {
++    const player7Cards = [
++      card("2", "C"),
++      card("5", "D"),
++      card("7", "H"),
++      card("9", "S"),
++      card("J", "C"),
++      card("Q", "D"),
++      card("A", "H"),
++    ];
++
++    expect(settleFortuneBet(1000, 50, player7Cards)).toBe(950);
++  });
+ 
+-    jest.resetModules(); 
++  it("does not evaluate or change bankroll when no fortune bet is placed", () => {
++    expect(settleFortuneBet(1000, 0, [])).toBe(1000);
+   });
+ });
+ 
+ describe("settleAllBets combined", () => {
+-  // Example scenario: main bet = 100, fortune = 10, result= "PLAYER WINS", best5=straight => 5 => net +4 on fortune.
+-  it("player wins main, also hits straight on fortune", () => {
+-    // We'll do a partial mock, or provide real data. Let's do a partial mock for simplicity:
+-    jest.mock('./pokerEvaluator', () => ({
+-      evaluateBest5of7: jest.fn(() => ({ category: 5, tiebreaks: [] })), // numeric 5 => "straight"
+-      getCategoryName: jest.fn(() => "straight"),
+-    }));
+-    const { settleAllBets } = require('./payouts');
+-
+-    const bankroll = 1000;
+-    const bets = { main: 100, fortune: 10 };
+-    const mainResult = "PLAYER WINS";
+-    const player7Cards = [];
++  it("settles a player main win and straight fortune bonus", () => {
++    const player7Cards = [
++      card("9", "C"),
++      card("10", "D"),
++      card("J", "H"),
++      card("Q", "S"),
++      card("K", "C"),
++      card("2", "D"),
++      card("5", "H"),
++    ];
++
++    const result = settleAllBets({
++      bankroll: 1000,
++      bets: { main: 100, fortune: 10 },
++      mainResult: "PLAYER WINS",
++      player7Cards,
++    });
++
++    expect(result.newRoll).toBe(1140);
++    expect(result.breakdown.main).toEqual({ outcome: "WIN", net: 100 });
++    expect(result.breakdown.fortune).toMatchObject({ outcome: "WIN", net: 40 });
++  });
+ 
+-    const newRoll = settleAllBets({ bankroll, bets, mainResult, player7Cards });
+-    // main bet: +100
+-    // fortune 'straight': multiplier=5 => net +4 * fortuneBet => +40
+-    // total +140 => 1140
+-    expect(newRoll).toBe(1140);
++  it("skips fortune evaluation when there is no fortune bet", () => {
++    const result = settleAllBets({
++      bankroll: 1000,
++      bets: { main: 25, fortune: 0 },
++      mainResult: "PUSH",
++      player7Cards: [],
++    });
+ 
+-    jest.resetModules();
++    expect(result.newRoll).toBe(1000);
++    expect(result.breakdown.fortune).toMatchObject({ outcome: "PUSH", net: 0 });
+   });
+ });
+diff --git a/babel.config.js b/babel.config.js
+new file mode 100644
+index 0000000..898ec94
+--- /dev/null
++++ b/babel.config.js
+@@ -0,0 +1,6 @@
++module.exports = {
++  presets: [
++    ["@babel/preset-env", { targets: { node: "current" } }],
++    ["@babel/preset-react", { runtime: "automatic" }],
++  ],
++};
+diff --git a/jest.config.js b/jest.config.js
+index ecc5718..f5d981a 100644
+--- a/jest.config.js
++++ b/jest.config.js
+@@ -1,201 +1,10 @@
+-/**
+- * For a detailed explanation regarding each configuration property, visit:
+- * https://jestjs.io/docs/configuration
+- */
+-
+ /** @type {import('jest').Config} */
+ const config = {
+-  // All imported modules in your tests should be mocked automatically
+-  // automock: false,
+-
+-  // Stop running tests after `n` failures
+-  // bail: 0,
+-
+-  // The directory where Jest should store its cached dependency information
+-  // cacheDirectory: "/tmp/jest_rs",
+-
+-  // Automatically clear mock calls, instances, contexts and results before every test
+   clearMocks: true,
+-
+-  // Indicates whether the coverage information should be collected while executing the test
+-  // collectCoverage: false,
+-
+-  // An array of glob patterns indicating a set of files for which coverage information should be collected
+-  // collectCoverageFrom: undefined,
+-
+-  // The directory where Jest should output its coverage files
+-  // coverageDirectory: undefined,
+-
+-  // An array of regexp pattern strings used to skip coverage collection
+-  // coveragePathIgnorePatterns: [
+-  //   "/node_modules/"
+-  // ],
+-
+-  // Indicates which provider should be used to instrument code for coverage
+-  // coverageProvider: "babel",
+-
+-  // A list of reporter names that Jest uses when writing coverage reports
+-  // coverageReporters: [
+-  //   "json",
+-  //   "text",
+-  //   "lcov",
+-  //   "clover"
+-  // ],
+-
+-  // An object that configures minimum threshold enforcement for coverage results
+-  // coverageThreshold: undefined,
+-
+-  // A path to a custom dependency extractor
+-  // dependencyExtractor: undefined,
+-
+-  // Make calling deprecated APIs throw helpful error messages
+-  // errorOnDeprecated: false,
+-
+-  // The default configuration for fake timers
+-  // fakeTimers: {
+-  //   "enableGlobally": false
+-  // },
+-
+-  // Force coverage collection from ignored files using an array of glob patterns
+-  // forceCoverageMatch: [],
+-
+-  // A path to a module which exports an async function that is triggered once before all test suites
+-  // globalSetup: undefined,
+-
+-  // A path to a module which exports an async function that is triggered once after all test suites
+-  // globalTeardown: undefined,
+-
+-  // A set of global variables that need to be available in all test environments
+-  // globals: {},
+-
+-  // The maximum amount of workers used to run your tests. Can be specified as % or a number. E.g. maxWorkers: 10% will use 10% of your CPU amount + 1 as the maximum worker number. maxWorkers: 2 will use a maximum of 2 workers.
+-  // maxWorkers: "50%",
+-
+-  // An array of directory names to be searched recursively up from the requiring module's location
+-  // moduleDirectories: [
+-  //   "node_modules"
+-  // ],
+-
+-  // An array of file extensions your modules use
+-  // moduleFileExtensions: [
+-  //   "js",
+-  //   "mjs",
+-  //   "cjs",
+-  //   "jsx",
+-  //   "ts",
+-  //   "tsx",
+-  //   "json",
+-  //   "node"
+-  // ],
+-
+-  // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
+-  // moduleNameMapper: {},
+-
+-  // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader
+-  // modulePathIgnorePatterns: [],
+-
+-  // Activates notifications for test results
+-  // notify: false,
+-
+-  // An enum that specifies notification mode. Requires { notify: true }
+-  // notifyMode: "failure-change",
+-
+-  // A preset that is used as a base for Jest's configuration
+-  // preset: undefined,
+-
+-  // Run tests from one or more projects
+-  // projects: undefined,
+-
+-  // Use this configuration option to add custom reporters to Jest
+-  // reporters: undefined,
+-
+-  // Automatically reset mock state before every test
+-  // resetMocks: false,
+-
+-  // Reset the module registry before running each individual test
+-  // resetModules: false,
+-
+-  // A path to a custom resolver
+-  // resolver: undefined,
+-
+-  // Automatically restore mock state and implementation before every test
+-  // restoreMocks: false,
+-
+-  // The root directory that Jest should scan for tests and modules within
+-  // rootDir: undefined,
+-
+-  // A list of paths to directories that Jest should use to search for files in
+-  // roots: [
+-  //   "<rootDir>"
+-  // ],
+-
+-  // Allows you to use a custom runner instead of Jest's default test runner
+-  // runner: "jest-runner",
+-
+-  // The paths to modules that run some code to configure or set up the testing environment before each test
+-  // setupFiles: [],
+-
+-  // A list of paths to modules that run some code to configure or set up the testing framework before each test
+-  // setupFilesAfterEnv: [],
+-
+-  // The number of seconds after which a test is considered as slow and reported as such in the results.
+-  // slowTestThreshold: 5,
+-
+-  // A list of paths to snapshot serializer modules Jest should use for snapshot testing
+-  // snapshotSerializers: [],
+-
+-  // The test environment that will be used for testing
+   testEnvironment: "node",
+   transform: {
+-    "^.+\\.(js|jsx)$": "babel-jest"
++    "^.+\\.(js|jsx)$": "babel-jest",
+   },
+-
+-  // Options that will be passed to the testEnvironment
+-  // testEnvironmentOptions: {},
+-
+-  // Adds a location field to test results
+-  // testLocationInResults: false,
+-
+-  // The glob patterns Jest uses to detect test files
+-  // testMatch: [
+-  //   "**/__tests__/**/*.[jt]s?(x)",
+-  //   "**/?(*.)+(spec|test).[tj]s?(x)"
+-  // ],
+-
+-  // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
+-  // testPathIgnorePatterns: [
+-  //   "/node_modules/"
+-  // ],
+-
+-  // The regexp pattern or array of patterns that Jest uses to detect test files
+-  // testRegex: [],
+-
+-  // This option allows the use of a custom results processor
+-  // testResultsProcessor: undefined,
+-
+-  // This option allows use of a custom test runner
+-  // testRunner: "jest-circus/runner",
+-
+-  // A map from regular expressions to paths to transformers
+-  // transform: undefined,
+-
+-  // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
+-  // transformIgnorePatterns: [
+-  //   "/node_modules/",
+-  //   "\\.pnp\\.[^\\/]+$"
+-  // ],
+-
+-  // An array of regexp pattern strings that are matched against all modules before the module loader will automatically return a mock for them
+-  // unmockedModulePathPatterns: undefined,
+-
+-  // Indicates whether each individual test should be reported during the run
+-  // verbose: undefined,
+-
+-  // An array of regexp patterns that are matched against all source file paths before re-running tests in watch mode
+-  // watchPathIgnorePatterns: [],
+-
+-  // Whether to use watchman for file crawling
+-  // watchman: true,
+ };
+ 
+ module.exports = config;
+diff --git a/package-lock.json b/package-lock.json
+index a402bcb..6473b90 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -9,7 +9,6 @@
+       "version": "0.1.0",
+       "dependencies": {
+         "clsx": "^2.1.1",
+-        "mobile-drag-drop": "^3.0.0-rc.0",
+         "next": "16.0.7",
+         "react": "19.2.1",
+         "react-dnd": "^16.0.1",
+@@ -21,7 +20,6 @@
+       "devDependencies": {
+         "@babel/preset-env": "^7.26.0",
+         "@babel/preset-react": "^7.26.3",
+-        "@eslint/eslintrc": "^3",
+         "@testing-library/dom": "^10.4.0",
+         "@testing-library/jest-dom": "^6.6.3",
+         "@testing-library/react": "^16.2.0",
+@@ -8819,12 +8817,6 @@
+         "node": ">=16 || 14 >=14.17"
+       }
+     },
+-    "node_modules/mobile-drag-drop": {
+-      "version": "3.0.0-rc.0",
+-      "resolved": "https://registry.npmjs.org/mobile-drag-drop/-/mobile-drag-drop-3.0.0-rc.0.tgz",
+-      "integrity": "sha512-f8wIDTbBYLBW/+5sei1cqUE+StyDpf/LP+FRZELlVX6tmOOmELk84r3wh1z3woxCB9G5octhF06K5COvFjGgqg==",
+-      "license": "MIT"
+-    },
+     "node_modules/ms": {
+       "version": "2.1.3",
+       "resolved": "https://registry.npmjs.org/ms/-/ms-2.1.3.tgz",
+diff --git a/package.json b/package.json
+index e787fd0..a26a8b7 100644
+--- a/package.json
++++ b/package.json
+@@ -11,7 +11,6 @@
+   },
+   "dependencies": {
+     "clsx": "^2.1.1",
+-    "mobile-drag-drop": "^3.0.0-rc.0",
+     "next": "16.0.7",
+     "react": "19.2.1",
+     "react-dnd": "^16.0.1",
+diff --git a/tailwind.config.mjs b/tailwind.config.mjs
+index b522c25..76bfae4 100644
+--- a/tailwind.config.mjs
++++ b/tailwind.config.mjs
+@@ -1,5 +1,5 @@
+ /** @type {import('tailwindcss').Config} */
+-export default {
++const config = {
+   content: [
+     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
+     "./components/**/*.{js,ts,jsx,tsx,mdx}",
+@@ -15,3 +15,5 @@ export default {
+   },
+   plugins: [],
+ };
++
++export default config;
+-- 
+2.43.0
+
