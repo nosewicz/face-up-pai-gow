@@ -1,27 +1,45 @@
 "use client";
 
+import Image from "next/image";
 import { useDrag } from "react-dnd";
 import { ITEM_TYPES } from "./dndConstants";
 
+const chipImages = {
+  1: "/chips/chip_white_top.png",
+  5: "/chips/chip_red_top.png",
+  25: "/chips/chip_green_top.png",
+  100: "/chips/chip_black_top.png",
+};
+
 export default function DraggableChip({ value }) {
-  // We'll pass the chipValue in the 'item' object
   const [{ isDragging }, dragRef] = useDrag(() => ({
-    type: ITEM_TYPES.CHIP,             // we'll define "CHIP" in dndConstants
-    item: { chipValue: value },        // data that goes to the drop zone
+    type: ITEM_TYPES.CHIP,
+    item: { chipValue: value },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
-  }));
+  }), [value]);
 
   const opacity = isDragging ? 0.4 : 1;
 
   return (
-    <div
+    <button
+      type="button"
       ref={dragRef}
       style={{ opacity }}
-      className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center cursor-grab"
+      className="relative h-14 w-14 cursor-grab rounded-full drop-shadow-lg active:cursor-grabbing active:scale-95 md:h-16 md:w-16"
+      aria-label={`$${value} chip`}
     >
-      ${value}
-    </div>
+      <Image
+        src={chipImages[value] || "/chips/chip_blue_top.png"}
+        alt=""
+        fill
+        sizes="64px"
+        className="object-contain"
+      />
+      <span className="absolute inset-0 flex items-center justify-center text-[0.68rem] font-black text-slate-950">
+        ${value}
+      </span>
+    </button>
   );
 }

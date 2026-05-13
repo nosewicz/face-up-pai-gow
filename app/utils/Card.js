@@ -5,22 +5,20 @@ import clsx from "clsx"; // Optional if you want to conditionally join classes e
 // If you don't want to install `clsx`, you can manually concatenate strings.
 
 export default function Card({ card, faceUp = true, selected = false }) {
+  const cardFrameClass = "relative w-[clamp(3.25rem,12vw,5rem)] aspect-[2/3] rounded-md shadow-lg cursor-pointer select-none overflow-hidden ring-1 ring-black/20 bg-white";
+
   // Face-down scenario (you may not need it if your game is always face-up)
   if (!faceUp) {
     return (
       (<div
-        className="w-20 h-28 bg-blue-900 text-white flex items-center justify-center 
-                   rounded shadow cursor-pointer select-none"
+        className={`${cardFrameClass} bg-blue-900 text-white flex items-center justify-center`}
       >
         <Image
           src={'/cards/back.png'}
           alt="Card Back"
-          width={80}
-          height={120}
-          style={{
-            maxWidth: "100%",
-            height: "auto"
-          }} />
+          fill
+          sizes="80px"
+          className="object-contain" />
       </div>)
     );
   }
@@ -28,44 +26,34 @@ export default function Card({ card, faceUp = true, selected = false }) {
   if (card.rank === "Joker") {
     return (
       (<div
-        className="w-20 h-28 bg-blue-900 text-white flex items-center justify-center 
-                   rounded shadow cursor-pointer select-none"
+        className={`${cardFrameClass} bg-blue-900 text-white flex items-center justify-center`}
       >
         <Image
           src={'/cards/joker.png'}
           alt="Joker"
-          width={80}
-          height={120}
-          style={{
-            maxWidth: "100%",
-            height: "auto"
-          }} />
+          fill
+          sizes="80px"
+          className="object-contain" />
       </div>)
     );
   }
 
   
-  const borderClass = "border-4 border-green-400";
-    
   const filename = `${card.rank}${card.suit}.png`; 
 
   return (
     (<div
       className={clsx(
-        "w-20 h-28 bg-white rounded shadow flex flex-col items-center justify-center cursor-pointer select-none hover:shadow-md transition",
-        borderClass
+        cardFrameClass,
+        "flex flex-col items-center justify-center hover:-translate-y-1 transition"
       )}
     >
       <Image
         src={`/cards/${filename}`}
         alt={`${card.rank} of ${card.suit}`}
-        width={80}
-        height={120}
-        sizes="100vw"
-        style={{
-          width: "100%",
-          height: "auto"
-        }} />
+        fill
+        sizes="80px"
+        className="object-contain" />
     </div>)
   );
 }

@@ -4,11 +4,9 @@ import { useDrop } from "react-dnd";
 import { ITEM_TYPES } from "./dndConstants";
 
 export default function BetCircle({ betType, betAmount, onDropChip }) {
-  // onDropChip is a callback that receives (betType, chipValue)
   const [{ isOver }, dropRef] = useDrop(() => ({
     accept: ITEM_TYPES.CHIP,
-    drop: (item, monitor) => {
-      // item = { chipValue: number }
+    drop: (item) => {
       if (onDropChip) {
         onDropChip(betType, item.chipValue);
       }
@@ -16,22 +14,22 @@ export default function BetCircle({ betType, betAmount, onDropChip }) {
     collect: (monitor) => ({
       isOver: monitor.isOver(),
     }),
-  }));
+  }), [betType, onDropChip]);
 
-  const backgroundColor = isOver ? "#ddd" : "transparent";
+  const label = betType === "main" ? "Play" : "Fortune";
 
   return (
-    <div>
-      <div
+    <div
       ref={dropRef}
-      className="bet-circle w-16 h-16 rounded-full border-2 border-gray-600 flex flex-col items-center justify-center"
-      style={{ backgroundColor }}
-      >
-      <p className="text-sm text-center">{betType} bet</p>
-      <p className="text-sm">${betAmount}</p>
-      </div>
-      
+      className={`flex aspect-square min-h-24 flex-1 flex-col items-center justify-center rounded-full border-4 border-double text-center shadow-inner transition md:min-h-28 ${
+        isOver
+          ? "border-amber-200 bg-amber-300/25 text-white"
+          : "border-amber-300/75 bg-emerald-950/55 text-amber-50"
+      }`}
+    >
+      <p className="text-xs font-bold uppercase tracking-[0.24em]">{label}</p>
+      <p className="mt-1 text-2xl font-black">${betAmount}</p>
+      <p className="text-[0.65rem] uppercase tracking-[0.18em] text-amber-100/75">Drop chips</p>
     </div>
-
   );
 }

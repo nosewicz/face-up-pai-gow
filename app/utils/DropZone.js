@@ -27,7 +27,7 @@ export default function DropZone({
     }),
   }), [onDropCard, canDropItem]);
 
-  const backgroundColor = isOver ? "#f0f0f0" : "transparent";
+  const backgroundColor = isOver ? "rgba(253, 230, 138, 0.16)" : undefined;
 
   return (
     <div ref={dropRef} className={className} style={{ backgroundColor }}>
