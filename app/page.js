@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { dealHands, compareHands } from "./utils/gameLogic";
 import { evaluate2CardHand } from "./utils/twoCardEvaluator";
 import { evaluate5CardHand } from "./utils/pokerEvaluator";
@@ -192,31 +192,25 @@ export default function Home() {
 
   // --- DRAG & DROP HANDLERS ---
 
-  const handleDropToLow = useCallback((item) => {
+  function moveCardToLow(item) {
     if (item.source !== "pool" || playerLow.length >= 2) return;
 
-    const card = playerPool[item.index];
-    if (!card || getCardKey(card) !== getCardKey(item.card)) return;
+    const selectedCard = playerPool[item.index];
+    if (!selectedCard) return;
 
-    setPlayerPool((prev) => prev.filter((_, i) => i !== item.index));
-    setPlayerLow((prev) => [...prev, card]);
-  }, [playerLow, playerPool]);
-  
-  const handleDropToPool = useCallback((item) => {
+    setPlayerPool((prevPool) => prevPool.filter((_, i) => i !== item.index));
+    setPlayerLow((prevLow) => [...prevLow, selectedCard]);
+  }
+
+  function moveCardToPool(item) {
     if (item.source !== "low") return;
 
-    const card = playerLow[item.index];
-    if (!card || getCardKey(card) !== getCardKey(item.card)) return;
+    const selectedCard = playerLow[item.index];
+    if (!selectedCard) return;
 
-    setPlayerLow((prev) => prev.filter((_, i) => i !== item.index));
-    setPlayerPool((prev) => [...prev, card]);
-  }, [playerLow]);
-
-  const canDropToLow = useCallback((item) => (
-    item.source === "pool" && playerLow.length < 2
-  ), [playerLow.length]);
-
-  const canDropToPool = useCallback((item) => item.source === "low", []);
+    setPlayerLow((prevLow) => prevLow.filter((_, i) => i !== item.index));
+    setPlayerPool((prevPool) => [...prevPool, selectedCard]);
+  }
 
   return (
     <main className="min-h-screen bg-[#10100d] px-3 py-4 text-white md:px-6 lg:px-8">

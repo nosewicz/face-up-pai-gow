@@ -75,26 +75,31 @@ export function settleAllBets({ bankroll, bets, mainResult, player7Cards }) {
   // if PUSH => mainNet=0, do nothing
 
   // Fortune logic:
-  let fortuneOutcome = "LOSE";
-  let fortuneNet = -bets.fortune; // default lose
-  let fortuneNote = "";
-  
-  // Evaluate the player's best 5-of-7, see if they qualify for bonus
-  // e.g. if 3-of-a-kind => pay 4×
-  const bestEval = evaluateBest5of7(player7Cards);
-  const categoryName = getCategoryName(bestEval.category);
-  const multiplier = fortunePaytable[categoryName] || 0;
-  if (multiplier > 0) {
-    fortuneOutcome = "WIN";
-    // net gain = (multiplier - 1)*bets.fortune if you remove the bet at the end 
-    // or multiplier*bets.fortune if you remove up front. 
-    // Here I'll assume approach A (only remove at final).
-    fortuneNet = bets.fortune * (multiplier - 1);
+  let fortuneOutcome = "PUSH";
+  let fortuneNet = 0;
+  let fortuneNote = "No Fortune bet placed";
+
+  if (bets.fortune > 0) {
+    fortuneOutcome = "LOSE";
+    fortuneNet = -bets.fortune;
+
+    // Evaluate the player's best 5-of-7, see if they qualify for bonus
+    // e.g. if 3-of-a-kind => pay 4×
+    const bestEval = evaluateBest5of7(player7Cards);
+    const categoryName = getCategoryName(bestEval.category);
+    const multiplier = fortunePaytable[categoryName] || 0;
+    if (multiplier > 0) {
+      fortuneOutcome = "WIN";
+      // net gain = (multiplier - 1)*bets.fortune if you remove the bet at the end
+      // or multiplier*bets.fortune if you remove up front.
+      // Here I'll assume approach A (only remove at final).
+      fortuneNet = bets.fortune * (multiplier - 1);
+      fortuneNote = `Hand: ${categoryName} pays ${multiplier}× on Fortune`;
+    } else {
+      fortuneNote = `Hand: ${categoryName} => no bonus`;
+    }
+
     newRoll += fortuneNet;
-    fortuneNote = `Hand: ${categoryName} pays ${multiplier}× on Fortune`;
-  } else {
-    fortuneNote = `Hand: ${categoryName} => no bonus`;
-    newRoll += fortuneNet; // negative
   }
 
   // Return final plus a "breakdown" object

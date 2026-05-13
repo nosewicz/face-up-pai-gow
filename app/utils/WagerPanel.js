@@ -27,6 +27,17 @@ export default function WagerPanel({
       alert("No previous bets to repeat!");
       return;
     }
+
+    const repeatTotal = Object.values(lastRoundBets).reduce(
+      (sum, amount) => sum + amount,
+      0,
+    );
+
+    if (repeatTotal > bankroll) {
+      alert("Not enough bankroll to repeat the last bet!");
+      return;
+    }
+
     setBets({ ...lastRoundBets });
   }
 

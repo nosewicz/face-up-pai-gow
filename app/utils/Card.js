@@ -1,8 +1,11 @@
 "use client";
-import Image from "next/image";
 
-import clsx from "clsx"; // Optional if you want to conditionally join classes easily
-// If you don't want to install `clsx`, you can manually concatenate strings.
+import Image from "next/image";
+import clsx from "clsx";
+
+export default function Card({ card, faceUp = true }) {
+  const baseClassName =
+    "w-20 h-28 rounded shadow cursor-pointer select-none flex items-center justify-center";
 
 export default function Card({ card, faceUp = true, selected = false }) {
   const cardFrameClass = "relative w-[clamp(3.25rem,12vw,5rem)] aspect-[2/3] rounded-md shadow-lg cursor-pointer select-none overflow-hidden ring-1 ring-black/20 bg-white";
@@ -14,7 +17,7 @@ export default function Card({ card, faceUp = true, selected = false }) {
         className={`${cardFrameClass} bg-blue-900 text-white flex items-center justify-center`}
       >
         <Image
-          src={'/cards/back.png'}
+          src="/cards/back.png"
           alt="Card Back"
           fill
           sizes="80px"
@@ -29,7 +32,7 @@ export default function Card({ card, faceUp = true, selected = false }) {
         className={`${cardFrameClass} bg-blue-900 text-white flex items-center justify-center`}
       >
         <Image
-          src={'/cards/joker.png'}
+          src="/cards/joker.png"
           alt="Joker"
           fill
           sizes="80px"
@@ -42,7 +45,7 @@ export default function Card({ card, faceUp = true, selected = false }) {
   const filename = `${card.rank}${card.suit}.png`; 
 
   return (
-    (<div
+    <div
       className={clsx(
         cardFrameClass,
         "flex flex-col items-center justify-center hover:-translate-y-1 transition"
