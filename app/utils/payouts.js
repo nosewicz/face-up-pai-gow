@@ -4,6 +4,7 @@ import { evaluateBest5of7, getCategoryName } from "./pokerEvaluator";
 
 // Example paytable
 const fortunePaytable = {
+  fiveAces: 400,
   threeOfAKind: 4,
   straight: 5,
   flush: 6,

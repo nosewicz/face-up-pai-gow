@@ -9,8 +9,6 @@ export default function DropZone({
   canDropItem,
   className,
 }) {
-  // onDropCard is a callback we call when a card is dropped
-  // canDropItem is optional if you want to filter
   const [{ isOver }, dropRef] = useDrop(() => ({
     accept: ITEM_TYPES.CARD,
     drop: (item) => {
@@ -28,7 +26,7 @@ export default function DropZone({
     collect: (monitor) => ({
       isOver: monitor.isOver(),
     }),
-  }));
+  }), [onDropCard, canDropItem]);
 
   const backgroundColor = isOver ? "#f0f0f0" : "transparent";
 

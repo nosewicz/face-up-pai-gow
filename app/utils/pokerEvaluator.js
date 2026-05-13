@@ -2,6 +2,7 @@
  * Full 5-card poker evaluator with Pai Gow Joker logic
  * 
  * Category ranks (higher is stronger):
+ * 11 = Five Aces (four natural Aces plus Joker)
  * 10 = Royal Flush (A-K-Q-J-10 all same suit)
  * 9  = Straight Flush
  * 8  = Four of a Kind
@@ -300,24 +301,40 @@ function evaluateWithPossibleJoker(cards, jokersCount) {
     return evaluateNoJoker(cards);
   }
 
-  // We have 1 Joker. Let's gather the non-Joker cards.
+  if (isFiveAces(cards)) {
+    return { category: 11, tiebreaks: [14] };
+  }
+
   const realCards = cards.filter(c => c.rank !== "Joker");
-  // We'll try all suits C,D,H,S and all ranks [2..14], but 
-  // we specifically emphasize the Joker as an Ace or as a bridging rank for straights,
-  // or as a suit for flushes. A thorough approach = brute force every combination:
   let best = null;
 
   for (let rank = 2; rank <= 14; rank++) {
     for (let suit of ['C','D','H','S']) {
-      // Construct a possible 5-card set using that rank/suit for the Joker
+      if (realCards.some((card) => card.value === rank && card.suit === suit)) {
+        continue;
+      }
+
       const attempt = [...realCards, { rank: 'X', value: rank, suit }];
       const res = evaluateNoJoker(attempt);
+      const jokerIsAce = rank === 14;
+      const completesStraightOrFlush = [5, 6, 9, 10].includes(res.category);
+
+      if (!jokerIsAce && !completesStraightOrFlush) {
+        continue;
+      }
+
       if (!best || compareEvaluation(res, best) > 0) {
         best = res;
       }
     }
   }
   return best;
+}
+
+function isFiveAces(cards) {
+  const aceCount = cards.filter((card) => card.value === 14).length;
+  const jokerCount = cards.filter((card) => card.rank === "Joker").length;
+  return aceCount === 4 && jokerCount === 1;
 }
 
 function evaluateNoJoker(cards) {
@@ -345,7 +362,7 @@ function evaluateNoJoker(cards) {
       tiebreaks = [14]; // not that it matters, it's the highest
     } else {
       category = 9; // Straight Flush
-      tiebreaks = [topStrVal];
+      tiebreaks = [topStrVal === 5 ? 15 : topStrVal];
     }
   } 
   else if (fourCount === 1) {
@@ -362,7 +379,7 @@ function evaluateNoJoker(cards) {
   }
   else if (isStr) {
     category = 5; // Straight
-    tiebreaks = [topStrVal];
+    tiebreaks = [topStrVal === 5 ? 13.5 : topStrVal];
   }
   else if (maxOfAKind === 3) {
     category = 4; // Three of a Kind
@@ -448,6 +465,7 @@ export function compare5CardHands(handA, handB) {
  */
 
 const categoryToString = {
+  11: "fiveAces",
   10: "royalFlush",
   9:  "straightFlush",
   8:  "fourOfAKind",

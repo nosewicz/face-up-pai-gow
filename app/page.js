@@ -14,6 +14,7 @@ import BlogIndex from "./utils/BlogIndex";
 import DropZone from "./utils/DropZone";
 import DraggableCard from "./utils/DraggableCard";
 
+const getCardKey = (card) => `${card.rank}-${card.suit ?? "joker"}`;
 
 export default function Home() {
   // Dealer states
@@ -258,7 +259,7 @@ export default function Home() {
           canDropItem={(item) => item.source === "pool" && playerLow.length < 2}
         >
           {playerLow.map((card, i) => (
-            <DraggableCard key={i} card={card} index={i} source="low" />
+            <DraggableCard key={getCardKey(card)} card={card} index={i} source="low" />
           ))}
         </DropZone>
       </section>
@@ -276,7 +277,7 @@ export default function Home() {
           canDropItem={(item) => item.source === "low"}
         >
           {playerPool.map((card, index) => (
-            <DraggableCard key={index} card={card} index={index} source="pool" />
+            <DraggableCard key={getCardKey(card)} card={card} index={index} source="pool" />
           ))}
         </DropZone>
       </section>

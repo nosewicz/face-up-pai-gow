@@ -37,15 +37,17 @@ export function arrangeHand(cards) {
  * then combine those results for a final outcome.
  */
 export function compareHands(playerLow, playerHigh, dealerLow, dealerHigh) {
+  if (isDealerAceHighPaiGow(dealerLow, dealerHigh)) {
+    return 'PUSH';
+  }
+
   // Compare 2-card hands:
   const twoCardResult = compare2CardHands(playerLow, dealerLow);
   let lowResult;
   if (twoCardResult > 0) {
     lowResult = 'WIN';
-  } else if (twoCardResult < 0) {
-    lowResult = 'LOSE';
   } else {
-    lowResult = 'TIE';
+    lowResult = 'LOSE';
   }
 
   // Compare 5-card hands:
@@ -53,10 +55,8 @@ export function compareHands(playerLow, playerHigh, dealerLow, dealerHigh) {
   let highResult;
   if (fiveCardResult > 0) {
     highResult = 'WIN';
-  } else if (fiveCardResult < 0) {
-    highResult = 'LOSE';
   } else {
-    highResult = 'TIE';
+    highResult = 'LOSE';
   }
 
   // Combine results:
@@ -67,4 +67,15 @@ export function compareHands(playerLow, playerHigh, dealerLow, dealerHigh) {
   } else {
     return 'PUSH';
   }
+}
+
+export function isDealerAceHighPaiGow(dealerLow, dealerHigh) {
+  const lowEval = evaluate2CardHand(dealerLow);
+  const highEval = evaluate5CardHand(dealerHigh);
+
+  return (
+    lowEval.category === 1 &&
+    highEval.category === 1 &&
+    highEval.tiebreaks[0] === 14
+  );
 }

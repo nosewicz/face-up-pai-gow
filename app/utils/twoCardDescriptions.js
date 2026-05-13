@@ -1,19 +1,18 @@
-export function describe2CardHand(cards, evalResult) {
-  // evalResult = { rank: 2 | 1, tiebreak: ? }
-  // cards = the 2-card array so we can see which rank(s) if it's a pair
-
+export function describe2CardHand(_cards, evalResult) {
   if (evalResult.category === 2) {
-    // It's a pair
-    const cardRank = cards[0].value === cards[1].value
-      ? cards[0].rank
-      : /* if you handle Joker logic, might differ */
-        cards[0].rank; // fallback
-
-    return `Pair of ${cardRank}`;
+    return `Pair of ${rankName(evalResult.tiebreaks[0])}`;
   } else {
-    // High card
-    // The higher card might be evalResult.tiebreak or whichever is bigger
-    const highestCard = cards[0].value > cards[1].value ? cards[0] : cards[1];
-    return `High Card ${highestCard.rank}`;
+    return `High Card ${rankName(evalResult.tiebreaks[0])}`;
   }
+}
+
+function rankName(value) {
+  const names = {
+    14: "A",
+    13: "K",
+    12: "Q",
+    11: "J",
+  };
+
+  return names[value] || String(value);
 }
