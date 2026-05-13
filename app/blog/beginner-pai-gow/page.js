@@ -1,22 +1,16 @@
-"use client";
-
-import Head from "next/head";
 import Link from "next/link";
+
+export const metadata = {
+  title: "Beginner's Guide to Pai Gow Poker | Free Online Trainer",
+  description: 'Learn Pai Gow Poker with our free online trainer. Discover the rules, find tips, and start playing Face-Up Pai Gow for free.',
+};
 
 export default function BeginnerPaiGow() {
   return (
     <>
-      <Head>
-        <title>Beginner's Guide to Pai Gow Poker | Free Online Trainer</title>
-        <meta
-          name="description"
-          content="Learn Pai Gow Poker with our free online trainer. Discover the rules, find tips, and start playing Face-Up Pai Gow for free."
-        />
-      </Head>
-
       <main className="max-w-4xl mx-auto p-4">
         <h1 className="text-3xl font-bold mb-4">
-          Beginner's Guide to Pai Gow Poker
+          Beginner&rsquo;s Guide to Pai Gow Poker
         </h1>
 
         <p className="mb-4">
@@ -43,7 +37,7 @@ export default function BeginnerPaiGow() {
         </h2>
         <ul className="list-disc list-inside mb-4">
           <li>Completely free – no deposit or sign-up required.</li>
-          <li>Face-Up Pai Gow mode to help you see the dealer’s strategy.</li>
+          <li>Face-Up Pai Gow mode to help you see the dealer&rsquo;s strategy.</li>
           <li>Practice side bets like the Fortune bonus without real-money risk.</li>
           <li>User-friendly interface to learn at your own speed.</li>
         </ul>

@@ -1,7 +1,6 @@
 "use client"; 
 // If you're on Next.js App Router, ensure client-side rendering for drag/drop
 
-import { useCallback } from "react"; // or useState if storing child-specific states
 import DraggableChip from "./DraggableChip";
 import BetCircle from "./BetCircle";
 
@@ -13,31 +12,39 @@ export default function WagerPanel({
   lastRoundBets,
   payoutBreakdown,
 }) {
+  const activeBetTotal = Object.values(bets).reduce((sum, amount) => sum + amount, 0);
+
   // For drag-and-drop
   function handleDropChip(betType, chipValue) {
-    console.log("Dropping chipValue:", chipValue, "on betType:", betType);
-
-    // Check bankroll
-    if (bankroll - chipValue < 0) {
+    if (activeBetTotal + chipValue > bankroll) {
       alert("Not enough bankroll!");
       return;
     }
 
-    // We only remove the bet from bankroll at final settlement (Approach A),
-    // unless you prefer subtracting up-front. For the "Approach A" way:
-    // Just add to bets
+    // Bets remain visible in the betting circles and are settled at round end.
     setBets((prev) => ({
       ...prev,
       [betType]: prev[betType] + chipValue,
     }));
   }
 
-   // The "Repeat Bet" button logic:
-   function handleRepeatBet() {
+  // The "Repeat Bet" button logic:
+  function handleRepeatBet() {
     if (!lastRoundBets) {
       alert("No previous bets to repeat!");
       return;
     }
+
+    const repeatTotal = Object.values(lastRoundBets).reduce(
+      (sum, amount) => sum + amount,
+      0,
+    );
+
+    if (repeatTotal > bankroll) {
+      alert("Not enough bankroll to repeat the last bet!");
+      return;
+    }
+
     setBets({ ...lastRoundBets });
   }
 
@@ -50,6 +57,7 @@ export default function WagerPanel({
 
       {/* Display Bankroll */}
       <p className="mb-2">Bankroll: ${bankroll}</p>
+      <p className="mb-2 text-sm">Committed this round: ${activeBetTotal}</p>
       {/* The "Repeat Bet" button */}
       <div className="mt-4 mb-4">
         <button

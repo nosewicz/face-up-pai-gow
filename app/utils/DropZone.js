@@ -13,15 +13,13 @@ export default function DropZone({
   // canDropItem is optional if you want to filter
   const [{ isOver }, dropRef] = useDrop(() => ({
     accept: ITEM_TYPES.CARD,
-    drop: (item, monitor) => {
+    drop: (item) => {
       // item = { index, source } from DraggableCard
-      console.log("DropZone drop fired with:", item);
       if (onDropCard) {
-        console.log("Calling onDropCard now...");
         onDropCard(item);
       }
     },
-    canDrop: (item, monitor) => {
+    canDrop: (item) => {
       if (canDropItem) {
         return canDropItem(item);
       }
