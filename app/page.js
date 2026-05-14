@@ -13,6 +13,7 @@ import { describe5CardHand } from "./utils/fiveCardDescriptions";
 import BlogIndex from "./utils/BlogIndex";
 import DropZone from "./utils/DropZone";
 import DraggableCard from "./utils/DraggableCard";
+import DjWildGame from "./utils/DjWildGame";
 
 const getCardKey = (card) => `${card.rank}-${card.suit ?? "joker"}`;
 
@@ -46,7 +47,7 @@ function TableHand({ title, subtitle, description, children, className = "" }) {
   );
 }
 
-export default function Home() {
+function PaiGowGame() {
   // Dealer states
   const [dealerLow, setDealerLow] = useState([]);
   const [dealerHigh, setDealerHigh] = useState([]);
@@ -219,7 +220,7 @@ export default function Home() {
   const canDropToPool = useCallback((item) => item.source === "low", []);
 
   return (
-    <main className="min-h-screen bg-[#10100d] px-3 py-4 text-white md:px-6 lg:px-8">
+    <main className="min-h-screen bg-[#10100d] px-3 pb-4 pt-20 text-white md:px-6 lg:px-8">
       <div className="mx-auto flex max-w-7xl flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,1fr)_20rem]">
         <section className="relative overflow-hidden rounded-[2rem] border-[10px] border-[#5a3218] bg-[#07563c] p-3 shadow-2xl ring-4 ring-[#2b170d] md:p-6">
           <div className="pointer-events-none absolute inset-3 rounded-[1.4rem] border border-amber-200/25" />
@@ -348,5 +349,38 @@ export default function Home() {
         </div>
       </div>
     </main>
+  );
+}
+
+function GameModeButton({ active, children, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`rounded px-3 py-2 text-xs font-black uppercase tracking-[0.14em] transition ${
+        active
+          ? "bg-amber-300 text-emerald-950"
+          : "border border-amber-300/45 bg-black/20 text-amber-100 hover:bg-amber-300/15"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+export default function Home() {
+  const [activeGame, setActiveGame] = useState("paiGow");
+
+  return (
+    <>
+      <div className="fixed left-3 top-3 z-50 flex gap-2 rounded-lg border border-white/10 bg-zinc-950/90 p-2 shadow-xl">
+        <GameModeButton active={activeGame === "paiGow"} onClick={() => setActiveGame("paiGow")}>
+          Pai Gow
+        </GameModeButton>
+        <GameModeButton active={activeGame === "djWild"} onClick={() => setActiveGame("djWild")}>
+          DJ Wild
+        </GameModeButton>
+      </div>
+      {activeGame === "paiGow" ? <PaiGowGame /> : <DjWildGame />}
+    </>
   );
 }

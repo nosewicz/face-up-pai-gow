@@ -3,7 +3,7 @@
 import { useDrop } from "react-dnd";
 import { ITEM_TYPES } from "./dndConstants";
 
-export default function BetCircle({ betType, betAmount, onDropChip }) {
+export default function BetCircle({ betType, betAmount, onDropChip, label }) {
   const [{ isOver }, dropRef] = useDrop(() => ({
     accept: ITEM_TYPES.CHIP,
     drop: (item) => {
@@ -16,7 +16,7 @@ export default function BetCircle({ betType, betAmount, onDropChip }) {
     }),
   }), [betType, onDropChip]);
 
-  const label = betType === "main" ? "Play" : "Fortune";
+  const displayLabel = label || (betType === "main" ? "Play" : "Fortune");
 
   return (
     <div
@@ -27,7 +27,7 @@ export default function BetCircle({ betType, betAmount, onDropChip }) {
           : "border-amber-300/75 bg-emerald-950/55 text-amber-50"
       }`}
     >
-      <p className="text-xs font-bold uppercase tracking-[0.24em]">{label}</p>
+      <p className="text-xs font-bold uppercase tracking-[0.24em]">{displayLabel}</p>
       <p className="mt-1 text-2xl font-black">${betAmount}</p>
       <p className="text-[0.65rem] uppercase tracking-[0.18em] text-amber-100/75">Drop chips</p>
     </div>
