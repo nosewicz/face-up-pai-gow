@@ -14,6 +14,7 @@ import BlogIndex from "./utils/BlogIndex";
 import DropZone from "./utils/DropZone";
 import DraggableCard from "./utils/DraggableCard";
 import DjWildGame from "./utils/DjWildGame";
+import UltimateXGame from "./utils/UltimateXGame";
 
 const getCardKey = (card) => `${card.rank}-${card.suit ?? "joker"}`;
 
@@ -343,9 +344,7 @@ function PaiGowGame() {
             lastRoundBets={lastRoundBets}
             payoutBreakdown={payoutBreakdown}
           />
-          <div className="rounded-lg bg-white text-slate-950 shadow-xl">
-            <BlogIndex />
-          </div>
+          <BlogIndex compact />
         </div>
       </div>
     </main>
@@ -379,8 +378,13 @@ export default function Home() {
         <GameModeButton active={activeGame === "djWild"} onClick={() => setActiveGame("djWild")}>
           DJ Wild
         </GameModeButton>
+        <GameModeButton active={activeGame === "ultimateX"} onClick={() => setActiveGame("ultimateX")}>
+          Ultimate X
+        </GameModeButton>
       </div>
-      {activeGame === "paiGow" ? <PaiGowGame /> : <DjWildGame />}
+      {activeGame === "paiGow" && <PaiGowGame />}
+      {activeGame === "djWild" && <DjWildGame />}
+      {activeGame === "ultimateX" && <UltimateXGame />}
     </>
   );
 }

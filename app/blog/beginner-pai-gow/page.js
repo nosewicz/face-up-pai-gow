@@ -1,14 +1,17 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "Beginner's Guide to Pai Gow Poker | Free Online Trainer",
-  description: 'Learn Pai Gow Poker with our free online trainer. Discover the rules, find tips, and start playing Face-Up Pai Gow for free.',
+  title: "Beginner's Guide to Pai Gow Poker | Play Pai Gow Free",
+  description: "Learn Pai Gow Poker rules, hand setting, and Face-Up Pai Gow strategy with a free online Pai Gow trainer.",
+  alternates: {
+    canonical: "/blog/beginner-pai-gow",
+  },
 };
 
 export default function BeginnerPaiGow() {
   return (
     <>
-      <main className="max-w-4xl mx-auto p-4">
+      <main className="mx-auto my-10 max-w-4xl rounded-lg border border-slate-200 bg-white p-5 text-slate-950 shadow-xl md:p-8">
         <h1 className="text-3xl font-bold mb-4">
           Beginner&rsquo;s Guide to Pai Gow Poker
         </h1>

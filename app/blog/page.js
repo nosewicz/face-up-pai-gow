@@ -1,11 +1,18 @@
 import BlogIndex from "../utils/BlogIndex";
 
 export const metadata = {
-  title: "Blog Posts | PaiGowLab.com",
+  title: "Free Pai Gow Poker, DJ Wild, and Ultimate X Guides | PaiGowLab",
   description:
-    "Learn Pai Gow Poker with our free online trainer. Discover the rules, find tips, and start playing Face-Up Pai Gow for free.",
+    "Learn Pai Gow Poker, Face-Up Pai Gow, DJ Wild, and Ultimate X with free online guides and practice games at PaiGowLab.",
+  alternates: {
+    canonical: "/blog",
+  },
 };
 
 export default function BlogPosts() {
-  return <BlogIndex />;
+  return (
+    <main className="min-h-screen bg-[#10100d] px-4 py-10">
+      <BlogIndex />
+    </main>
+  );
 }

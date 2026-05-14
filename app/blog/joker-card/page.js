@@ -1,14 +1,17 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: 'The Joker Card in Pai Gow Poker | Tips & Tricks',
-  description: "Learn how the Joker card works in Pai Gow Poker. It's semi-wild, helping form straights, flushes, or acting as an Ace.",
+  title: "Pai Gow Joker Rules | How the Joker Card Works",
+  description: "Learn Pai Gow Joker rules and how the semi-wild joker acts as an ace or completes a straight or flush.",
+  alternates: {
+    canonical: "/blog/joker-card",
+  },
 };
 
 export default function JokerCardPost() {
   return (
     <>
-      <main className="max-w-4xl mx-auto p-4">
+      <main className="mx-auto my-10 max-w-4xl rounded-lg border border-slate-200 bg-white p-5 text-slate-950 shadow-xl md:p-8">
         <h1 className="text-3xl font-bold mb-4">
           The Joker Card in Pai Gow Poker: How It Works & Why It Matters
         </h1>

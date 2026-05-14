@@ -1,0 +1,55 @@
+export const JacksOrBetter86TenPlay = {
+  id: "jacks-or-better-86-ten-play",
+  label: "Jacks or Better 8/6",
+  hands: 10,
+  defaultBetPerHand: 5,
+  pays: {
+    royalFlush: 800,
+    straightFlush: 50,
+    fourOfAKind: 25,
+    fullHouse: 8,
+    flush: 6,
+    straight: 4,
+    threeOfAKind: 3,
+    twoPair: 2,
+    jacksOrBetter: 1,
+    nothing: 0,
+  },
+  multipliers: {
+    royalFlush: 7,
+    straightFlush: 7,
+    fourOfAKind: 3,
+    fullHouse: 12,
+    flush: 11,
+    straight: 7,
+    threeOfAKind: 4,
+    twoPair: 3,
+    jacksOrBetter: 2,
+    nothing: 1,
+  },
+};
+
+export const VIDEO_POKER_HAND_LABELS = {
+  royalFlush: "Royal Flush",
+  straightFlush: "Straight Flush",
+  fourOfAKind: "Four of a Kind",
+  fullHouse: "Full House",
+  flush: "Flush",
+  straight: "Straight",
+  threeOfAKind: "Three of a Kind",
+  twoPair: "Two Pair",
+  jacksOrBetter: "Jacks or Better",
+  nothing: "No Win",
+};
+
+export const VIDEO_POKER_HAND_ORDER = [
+  "royalFlush",
+  "straightFlush",
+  "fourOfAKind",
+  "fullHouse",
+  "flush",
+  "straight",
+  "threeOfAKind",
+  "twoPair",
+  "jacksOrBetter",
+];

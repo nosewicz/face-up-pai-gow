@@ -1,14 +1,17 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: 'Face-Up Pai Gow Poker | Free Practice & Online Trainer',
-  description: 'Discover Face-Up Pai Gow Poker. Learn how to play, see the dealer’s cards, and practice for free with our online trainer.',
+  title: "Learn to Play Face-Up Pai Gow Poker Free",
+  description: "Learn to play Face-Up Pai Gow Poker, see how the dealer hand works, and practice online for free at PaiGowLab.",
+  alternates: {
+    canonical: "/blog/face-up-pai-gow",
+  },
 };
 
 export default function FaceUpPaiGow() {
   return (
     <>
-      <main className="max-w-4xl mx-auto p-4">
+      <main className="mx-auto my-10 max-w-4xl rounded-lg border border-slate-200 bg-white p-5 text-slate-950 shadow-xl md:p-8">
         <h1 className="text-3xl font-bold mb-4">
           Face-Up Pai Gow Poker: Everything You Need to Know
         </h1>

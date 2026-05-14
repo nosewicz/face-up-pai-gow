@@ -1,14 +1,17 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: '5 Strategies to Improve Your Pai Gow Poker Skills | Free Trainer',
-  description: 'Five key Pai Gow Poker strategies to help you win, from two-card hand splitting to Joker usage. Practice for free in our Face-Up Pai Gow trainer.',
+  title: "Pai Gow Poker Strategy | Free Face-Up Pai Gow Practice",
+  description: "Improve your Pai Gow Poker strategy with hand-splitting tips, joker usage, and free Face-Up Pai Gow practice.",
+  alternates: {
+    canonical: "/blog/pai-gow-strategies",
+  },
 };
 
 export default function PaiGowStrategies() {
   return (
     <>
-      <main className="max-w-4xl mx-auto p-4">
+      <main className="mx-auto my-10 max-w-4xl rounded-lg border border-slate-200 bg-white p-5 text-slate-950 shadow-xl md:p-8">
         <h1 className="text-3xl font-bold mb-4">
           5 Strategies to Improve Your Pai Gow Poker Skills
         </h1>
