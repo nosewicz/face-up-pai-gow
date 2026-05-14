@@ -5,6 +5,8 @@ import Providers from "./providers";
 
 const siteUrl = "https://paigowlab.com";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   metadataBase: new URL(siteUrl),
   title: {
@@ -54,27 +56,28 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "PaiGowLab",
+    url: siteUrl,
+    description:
+      "Free online Pai Gow Poker, Face-Up Pai Gow, DJ Wild, and Ultimate X practice games and guides.",
+  };
+
   return (
     <html lang="en">
       <head>
         <meta name="google-adsense-account" content="ca-pub-5619143235904865"></meta>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "WebSite",
-              name: "PaiGowLab",
-              url: siteUrl,
-              description:
-                "Free online Pai Gow Poker, Face-Up Pai Gow, DJ Wild, and Ultimate X practice games and guides.",
-            }),
-          }}
-        />
       </head>
       <body
         className="antialiased bg-gray-100 dark:bg-gray-800"
       >
+        <Script
+          id="structured-data"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
         <Script async src="https://www.googletagmanager.com/gtag/js?id=G-STCSWY7WCG" />
         <Script id="googleanalytics-init">
           {`
